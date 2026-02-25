@@ -18,7 +18,26 @@ class AminoAcid:
 
 #Dictionnaire pour stocker les informations sur AA
 AA_DB={
-    "A": AminoAcid("Alanine","A",1.8,8.1,0,True,1.0,89.1),
+    "Ala": AminoAcid("Alanine","Ala",1.8,8.1,0,True,1.0,89.1),
+    "Gly": AminoAcid("Glycine","Gly",-0.4,9.0,0,True,1.0,75.07),
+    "Ser": AminoAcid("Serine","Ser",-0.8,9.2,0,False,1.0,105.09),
+    "Pro": AminoAcid("Proline","Pro",-1.6,8.0,0,False,1.0,115.13),
+    "Val": AminoAcid("Valine","Val",4.2,5.9,0,True,2.9,117.15),
+    "Thr": AminoAcid("Threonine","Thr",-0.7,8.6,0,False,1.0,119.12),
+    "Cys": AminoAcid("Cysteine","Cys",2.5,5.5,0,False,1.0,121.16),
+    "Leu": AminoAcid("Leucine","Leu",3.8,4.9,0,True,3.9,131.18),
+    "Ile": AminoAcid("Isoleucine","Ile",4.5,5.2,0,True,3.9,131.18),
+    "Asn": AminoAcid("Asparagine","Asn",-3.5,11.6,0,False,1.0,132.12),
+    "Asp": AminoAcid("Aspartic acid","Asp",-3.5,13.0,-1,False,1.0,133.11),
+    "Gln": AminoAcid("Glutamine","Gln",-3.5,10.5,0,False,1.0,146.15),
+    "Lys": AminoAcid("Lysine","Lys",-3.9,11.3,1,False,1.0,146.19),
+    "Glu": AminoAcid("Glutamic acid","Glu",-3.5,12.3,-1,False,1.0,147.13),
+    "Met": AminoAcid("Methionine","Met",1.9,5.7,0,False,1.0,149.21),
+    "His": AminoAcid("Histidine","His",-3.9,10.4,1,False,1.0,155.16),
+    "Phe": AminoAcid("Phenylalanine","Phe",2.8,5.2,0,False,1.0,165.19),
+    "Arg": AminoAcod("Arginine","Arg",-4.5,10.5,1,False,1.0,174.20),
+    "Tyr": AminoAcid("Tyrosine","Tyr",-1.3,6.2,0,False,1.0,181.19),
+    "Trp": AminoAcid("Tryptophan","Trp",-0.9,5.4,0,False,1.0,204.23),
     
     
 }

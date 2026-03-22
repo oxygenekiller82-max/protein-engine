@@ -1,22 +1,30 @@
 class AminoAcid:
     def __init__(self,name,code,hydro,polarity,charge,is_aliphatic,ali_weight,molecular_mass):
+        """Creates a new Amino acid object"""
         self.name=name
         self.code=code
         self.hydro=hydro
-        self.ploarity=polarity
+        self.polarity=polarity
         self.charge=charge
         self.is_aliphatic=is_aliphatic
         self.ali_weight=ali_weight
         self.molecular_mass=molecular_mass
 
 
-    def __repr_(self):
-        """returns AA's Code"""
+    def __repr__(self):
+        """returns AA's Code(3 Letters)"""
         return f"AA({self.code})"
+    #Rq: les __ __ -> pour permettre d'afficher la liste des objects:
+    #Ex: liste_AA=list(AA_DB.values())
+    #print(liste_AA)
+    #Sans les __ __ le résultat sera une liste incompréhensible d'obejcts mémoire(<__main<<.object at 0x00002.)
+    #mais avec  __ __ -> liste valide comme [AA(Gly), AA(Trp)]...
+
     
 
 
 #Dictionnaire pour stocker les informations sur AA
+            #name | code | hydrophobicity | polarity | isAliphatic | aliphaticWeight | molecularMass
 AA_DB={
     "Ala": AminoAcid("Alanine","Ala",1.8,8.1,0,True,1.0,89.1),
     "Gly": AminoAcid("Glycine","Gly",-0.4,9.0,0,True,0,75.07),
@@ -35,9 +43,36 @@ AA_DB={
     "Met": AminoAcid("Methionine","Met",1.9,5.7,0,False,0,149.21),
     "His": AminoAcid("Histidine","His",-3.9,10.4,1,False,0,155.16),
     "Phe": AminoAcid("Phenylalanine","Phe",2.8,5.2,0,False,0,165.19),
-    "Arg": AminoAcod("Arginine","Arg",-4.5,10.5,1,False,0,174.20),
+    "Arg": AminoAcid("Arginine","Arg",-4.5,10.5,1,False,0,174.20),
     "Tyr": AminoAcid("Tyrosine","Tyr",-1.3,6.2,0,False,0,181.19),
     "Trp": AminoAcid("Tryptophan","Trp",-0.9,5.4,0,False,0,204.23),
-    
-    
 }
+
+#Sliding window helper: 
+#Bulky AA: Mass >150 
+#List comprehension avec Dictionnaire! 
+#AA_BD.items() -> list des Vals dans le dictionnaire [("Ala",AminoAcod_Obj)..]
+#code for code, aa ->code -> Ala, aa->AminoAcid object!
+BULKY_AAS=[code for code,AA in AA_DB.items() if AA.molecular_mass>150]
+
+print(BULKY_AAS)
+
+#Dynamiquement claculer le MAX et le MIN de tous les Porperietés:
+
+PROPERTIES=['hydro','molecular_mass','ali_weight','polarity']
+LIMITS={}
+
+for p in PROPERTIES: 
+    all_values=[]
+    #liste de toutes les valeurs de chaque proprité
+    for AA in AA_DB.values():
+        val = getattr(AA,p)# !! CANNOT do AA.p ! -> getaatr(AA,p) instead!
+        all_values.append(val)
+
+    LIMITS[p]={
+        'min': min(all_values),#SOUS dictionnaire! 
+        'max': max(all_values)
+    }
+#RESULT -> Limits will have: 'hydro':{'min': ... , 'max' ..} for each property!!!
+
+print(LIMITS)

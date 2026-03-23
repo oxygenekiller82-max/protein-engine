@@ -57,9 +57,10 @@ BULKY_AAS=[code for code,AA in AA_DB.items() if AA.molecular_mass>150]
 
 print(BULKY_AAS)
 
+
 #Dynamiquement claculer le MAX et le MIN de tous les Porperietés:
 
-PROPERTIES=['hydro','molecular_mass','ali_weight','polarity']
+PROPERTIES=['hydro','molecular_mass','ali_weight','polarity','charge']
 LIMITS={}
 
 for p in PROPERTIES: 
@@ -75,4 +76,5 @@ for p in PROPERTIES:
     }
 #RESULT -> Limits will have: 'hydro':{'min': ... , 'max' ..} for each property!!!
 
-print(LIMITS)
+print("---------------------")
+print(f"LIMITS dict:{LIMITS}")

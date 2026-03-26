@@ -24,7 +24,7 @@ class AminoAcid:
 
 
 #Dictionnaire pour stocker les informations sur AA
-            #name | code | hydrophobicity | polarity | isAliphatic | aliphaticWeight | molecularMass
+            #name | code | hydrophobicity | polarity | Charge | isAliphatic | aliphaticWeight | molecularMass
 AA_DB={
     "Ala": AminoAcid("Alanine","Ala",1.8,8.1,0,True,1.0,89.1),
     "Gly": AminoAcid("Glycine","Gly",-0.4,9.0,0,True,0,75.07),

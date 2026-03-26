@@ -1,0 +1,302 @@
+#Formulas file 
+import math 
+from AA_BD import LIMITS
+from AA_BD import BULKY_AAS
+
+def calculate_hydrophobicity(sequence):
+    """ 1/n * Sum(Hi): returns hydrophobicity result of the list of AA"""
+    if len(sequence)==0: return 0 
+    total_hydro=sum(aa.hydro for aa in sequence)
+    return total_hydro/len(sequence)
+
+#Why not, molecular mass slider ?
+
+def calculate_molecular_mass(sequence):
+    """Sum of all AA molecular mass"""
+    return sum(AA.molecular_mass for AA in sequence)
+
+
+def calcualte_entropy(sequence):
+    """-Sum (pi*log2(pi)), i = UNIQUE amino acid in the SET"""
+    if len(sequence)==0: return 0
+
+    entropy=0
+
+    set_count={} #UNIQUE AAs + their count 
+    for aa in sequence:
+        set_count[aa.code] = set_count.get(aa.code,0)+1
+
+    for code in set_count:
+        p_i= set_count[code]/len(sequence) #FREQUENCE de chaque AA UNQIUE
+        entropy-=p_i*math.log2(p_i)
+
+    return entropy
+
+#Rq: Generallement un Indice Aliphatique >70 est considéré stable, <40 est non resistant 
+#à l'augmentation de la temperature
+
+#50-70 = "Mesophilic": Stable at body temperature (37C)
+#>85 = Thermophilic: can survive higher tempratrures 
+#<40 = Unstable: folds at even room temperture
+def calculate_stability(sequence,user_target_length):
+    """Formule d'indice Aliphatique(Aal,Val,Leu,Ile) Glycine est ignoré (chaine= 1 Hydrogen)
+        UPDATED: divide by the OVERALL length not just the current_sequence length
+        otherwise during DFS the average will be based on the current_sequence of AAs only ! 
+        which will be a very high not accurate average!!!!!!!!
+    """
+    if not sequence:
+        return 0
+    
+    totalIndex=0
+    
+    aliphatic=['Ala','Val','Ile','Leu']
+
+    for AA in sequence: 
+        if AA.code in aliphatic:
+            totalIndex+=AA.ali_weight
+
+    AI=(totalIndex/user_target_length)*100 #not an average but a -> "Global index!"
+    #Simplified version of the X(Ala)+a.X(val).. 
+    return AI
+
+#Dummy test: 
+from AA_BD import AA_DB
+
+sequence=[AA_DB["Ala"],AA_DB["Val"],AA_DB["Trp"],AA_DB["Phe"]]
+print(f"Stability AI average: {calculate_stability(sequence,len(sequence))}")
+
+
+def calculate_binding_affinity(sequence):
+    """measures how 'sticky' the seqeunce is as in how much it will bind to a target(receptors, other proteins)
+       : Sum of Electrostatics (|Charge|) + Dipoles (polarity Sum)"""
+    total_charge=sum(abs(AA.charge) for AA in sequence)
+    total_polarity=sum(AA.polarity for AA in sequence)
+
+    return total_charge + total_polarity
+    #Why SUM -> BINDING = ADDITIVE property !! each charge/polar residue controbutes to the toal affinity!!! 
+
+    
+#Normalization des valeurs propriétes des AA: 
+#POURQUOI ? -> Normlisation assure que un changement de 10% en Binding Affinity
+#A la meme importance qu'un changement de 10% en Stabilité 
+
+
+def normalize_aa(AA):
+    """Retorune un Dictionnaire des valeurs Normalizés des AA(entre 0.0 et 1.0)"""
+
+    normalized_AA={}
+
+    properties=['hydro','polarity','charge','molecular_mass','ali_weight']
+
+    for p in properties:
+        val=getattr(AA,p) #Aagin AA.p wouldn't work..
+        min=LIMITS[p]['min']
+        max=LIMITS[p]['max']
+
+        normalized_AA[p]=(val-min)/(max-min)
+
+    return normalized_AA
+
+#Test
+print(f"Normalized AA Test: {normalize_aa(AA_DB["Trp"])}")
+
+
+#Sliding Window -> Check pour les 3 AA récents ajoutés 
+def sliding_window_check(current_sequence):
+    """un Check pour les AAs récemment ajoutés: pruning trés rapide
+        Retorune True ou false"""
+
+    if len(current_sequence)<3:
+        return True
+    
+    #Steric hindrance
+    
+    window=current_sequence[-3:] #3 AA récents 
+
+    bulky_count=sum(1 for AA in window if AA.code in BULKY_AAS) #"Generator Expression wow"
+
+    print(f"DEBUG: bulky_count calculated as: {bulky_count}")
+
+    if bulky_count>2: #100% du window = bulky
+        return False #Failed the test -> PRUNE
+    
+    #Static repulsion 
+    charge=[aa.charge for aa in window] #list des charges Ex: [-1 +1 +1]..
+
+    
+
+    #Si meme charge -> répulsion -> PRUNE
+    if all(c>0 for c in charge):
+        return False
+    
+    if all(c<0 for c in charge):
+        return False
+
+    return True
+
+
+#Test 
+sequence2=[AA_DB["Trp"],AA_DB["Phe"],AA_DB["Tyr"]]
+print("----------------------------")
+print(sliding_window_check(sequence2))
+
+#BRANCH AND BOUND! 
+#binding affinity = fonction de : Polarité + charge -> Max score pour une séquence de longeur K= 
+#AA qui a max polarité + charge! -> à déterminer: 
+
+def best_AA_binding_affinity():
+    max_score=0
+    last_AA_checked=None
+
+    for AA in AA_DB.values():
+        #1-Normaliser
+        normalized_AA = normalize_aa(AA)
+        #2-calculer average
+        current_score=(normalized_AA['polarity']+abs(AA.charge))/2
+        #3-compare
+        if current_score>max_score:
+            max_score=current_score
+            last_AA_checked=AA
+
+    print(f"MAX score stabilité (polarité + charge) {max_score}")
+    print(f"AA qui contribue le MAX au stabilité:{last_AA_checked}")
+    #FOR NOW with our sources -> it's ... Aspartic Acid! ! 'Asp' ! takes the crown! 
+      
+    return last_AA_checked
+
+#Et bine sur pour le min bound -> AA qui contribue le moints pour binding affinity
+def worst_AA_binding_affinity():
+    min_score=float('inf')
+    last_AA_checked=None
+
+    for AA in AA_DB.values():
+        #1-Normaliser
+        normalized_AA = normalize_aa(AA)
+        #2-calculer average
+        current_score=(normalized_AA['polarity']+abs(AA.charge))/2
+        #3-compare
+        if current_score<min_score:
+            min_score=current_score
+            last_AA_checked=AA
+
+    print(f"MIN score stabilité (polarité + charge) {min_score}")
+    print(f"AA qui contribue le MIN au stabilité:{last_AA_checked}")
+    #FOR NOW with our sources -> it's ... Aspartic Acid! ! 'Asp' ! takes the crown! 
+      
+    return last_AA_checked
+    
+print(best_AA_binding_affinity())
+print(worst_AA_binding_affinity())
+
+
+def get_branch_and_bound(current_sequence,target_length):
+    """Input: -current_sequence: current AA list,
+              -user_score for EACH property: a Dict, 
+              -user sequence target length: Integer.
+        Output: Dict of all max and min scores(val) for EACH property(key)
+    """
+    properties=['hydro','molecular_mass','stability','binding_affinity']
+
+    #K=remaining length for the sequence = positions libres de AA
+    k=target_length-len(current_sequence)
+
+    branch_bounds={} #Result: like this; {'hydro':{MAX_theoretical_score,MIN_theoretical_score}}
+
+    #Partie 1: Hydro + masse molécualaire -> K*best_score 
+    branch_bounds['hydro']={
+        'min': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['min'])/target_length,
+        'max': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['max'])/target_length
+    }
+
+    branch_bounds['molecular_mass']={
+        'min': calculate_molecular_mass(current_sequence)+(k*LIMITS['molecular_mass']['min']),
+        'max': calculate_molecular_mass(current_sequence)+(k*LIMITS['molecular_mass']['max']),
+    }
+
+    #Partie2: Stability + binding_affinity... -> stability(curreny_sequqence) + MAAX Aliphatic Weight index for the remaining K positions
+
+    branch_bounds['stability']={
+        'min': calculate_stability(current_sequence,target_length)+(k*LIMITS['ali_weight']['min']/target_length)*100,
+        'max': calculate_stability(current_sequence,target_length)+(k*LIMITS['ali_weight']['max']/target_length)*100 
+    }
+
+    
+    branch_bounds['binding_affinity']={
+        'min': calculate_binding_affinity(current_sequence) + k*calculate_binding_affinity([worst_AA_binding_affinity()]),
+        'max': calculate_binding_affinity(current_sequence) + k*calculate_binding_affinity([best_AA_binding_affinity()])
+    }
+
+    return branch_bounds
+
+#Testing branch and bound because THIS TOOK AS MUCH TIME AS ALL OTHER FUNCTIONS COMBINED ???
+branch_bound_test_sequence=[
+    AA_DB['Asp'], AA_DB['Leu'], AA_DB['Asp'], 
+    AA_DB['Ala'], AA_DB['Glu'], AA_DB['Leu'], 
+    AA_DB['Arg'], AA_DB['Gly'], AA_DB['Lys'], 
+    AA_DB['Leu']
+]
+print("---- BRANCH --- AND --- BOUND YEEHAWW")
+print(get_branch_and_bound(branch_bound_test_sequence,51))
+print("-------------------------------------")
+#WOW
+
+
+def is_sequence_good(current_sequence,branch_bounds,user_targets):
+    """a big True/False check: tells DFS Continue or PRUNE!"""
+
+    #SLIDING WINDOW! 
+    if not sliding_window_check(current_sequence):
+        return False
+
+    #masse moléculaire: masse lightest already heavier than user target -> PRUNE
+    #or masse heaviest already lighter than user target -> PRUNE
+    if branch_bounds['molecular_mass']['min']>user_targets['mass_max'] or if branch_bounds['molecular_mass']['max'] < user_targets['mass_min']: 
+        return False
+    
+    #Hydro: 
+    if branch_bounds['hydro']['max'] < user_targets['hydro_min'] or branch_bounds['hydro']['min'] > user_targets['hydro_max']:
+        return False
+    
+    #binding affinity: max affinity possible < min de user -> PRUNE
+    if branch_bounds['binding_affinity']['max'] < user_targets['binding_min']:
+        return False
+    
+    #Stability : max stabilié possible < min de user -> PRUNE
+    if branch_bounds['stability']['max'] < user_targets['stability_min']:
+        return False
+    
+    return True #PASSES!
+
+
+
+def DFS(current_sequence,target_length,user_targets,res):
+    #DFS = réscursivité:
+    #base case: déja seqeunce de logneur target_len trouvée
+
+    if(len(res)>=20):
+        return #just 20 test
+
+    if len(current_sequence)==target_length:
+        res.append(current_sequence)
+        return 
+    
+    branch_bounds=get_branch_and_bound(current_sequence,target_length)
+    if not is_sequence_good(branch_bounds,user_targets):
+        return #PRUNE THIS BRANCH
+    
+    #exploration 
+    for AA in AA_DB.values():
+        DFS(current_sequence+AA,target_length,user_targets,res)
+
+#FINAL RESULT:
+found_AA=[]
+sample_targets={
+    'hydro_min': -2.0,
+    'hydro_max': 2.0,
+    'mass_max': 7000,
+    'mass_min': 5000,
+    'stability_min':50.0,
+    'binding_min':400.0
+}
+DFS([],51,sample_targets,found_AA)
+print(f"AAND WE GOT:{found_AA}")

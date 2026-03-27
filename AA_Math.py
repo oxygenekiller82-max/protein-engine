@@ -136,6 +136,65 @@ def sliding_window_check(current_sequence):
 
     return True
 
+#Yikes... CHANGED DIRECTION ! adding bilogical constraints on top of the math ones
+#andd the first one is... Folding potential -> fush fasman or whatever
+from AA_BD import PROPENSITIES_DB
+
+def sliding_window_folding_check(current_sequence):
+    """NEW ADDITION! a check if the sequence can FOLD or not(alpha or beta)
+        using chou-fasman algorithm"""
+    
+    window_size=6 #'Nucleation points' needed lenght
+
+    if len(current_sequence)<window_size:
+        return True 
+    
+    window = current_sequence[-window_size:] #last 6 AAs
+    #calculer socore pa/pb -> socre pour former heclies alpha/beta 
+    score_pa=sum(PROPENSITIES_DB[aa.code]['pa'] for aa in window) / window_size
+    score_pb=sum(PROPENSITIES_DB[aa.code]['pb'] for aa in window) / window_size
+
+    if score_pa <1.0 and score_pb <1.04: #1.0 = average 
+        return False
+    
+    return True
+
+    
+
+#Bilogical #2: charged ends for the hooks 
+def check_charged_ends(current_sequence,target_length):
+    """for sequence to ATTACH to other stuff -> ends must not hydrophobic"""
+
+    HYDRO_SEUIL= -0.5 ########### hmm
+    if len(current_sequence)==3: 
+        #first 3 = "N-Terminus": start too oily = bad 
+        hydro_score_n=sum(AA.hydro for AA in current_sequence)/3 
+        if hydro_score_n >HYDRO_SEUIL:
+            return False
+        
+        if not(any(AA.charge !=0 for AA in current_sequence)): 
+            return False #ONE at least one charged AA at the end
+        
+    #last 3 = "C-Terminus": AT least ONE AA has binding affinity high (Polar or abs(charged))
+    if len(current_sequence)==target_length:
+        last_three=current_sequence[-3:]
+        hydro_score_c=sum(AA.hydro for AA in last_three)/3
+        if hydro_score_c>HYDRO_SEUIL:
+            return False
+        
+        if not(any(AA.charge !=0 for AA in last_three)): 
+            return False #ONE at least one charged AA at the end
+        
+    return True
+
+#THIRD biological constraint: 
+def check_net_charge(current_sequence,target):
+    total_charge=sum(AA.charge for AA in current_sequence)
+
+    if(len(current_sequence)==target_length):
+        return target['net_charge_target']
+
+
 
 #Test 
 sequence2=[AA_DB["Trp"],AA_DB["Phe"],AA_DB["Tyr"]]
@@ -206,8 +265,8 @@ def get_branch_and_bound(current_sequence,target_length):
 
     #Partie 1: Hydro + masse molécualaire -> K*best_score 
     branch_bounds['hydro']={
-        'min': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['min'])/target_length,
-        'max': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['max'])/target_length
+        'min': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['min']),
+        'max': calculate_hydrophobicity(current_sequence)+(k*LIMITS['hydro']['max'])
     }
 
     #branch_bounds['molecular_mass']={
@@ -251,7 +310,7 @@ print("-------------------------------------")
 #WOW
 
 
-def is_sequence_good(current_sequence,branch_bounds,user_targets):
+def is_sequence_good(current_sequence,branch_bounds,user_targets,bilogical_switch):
     """a big True/False check: tells DFS Continue or PRUNE!"""
 
     #SLIDING WINDOW! 
@@ -274,6 +333,14 @@ def is_sequence_good(current_sequence,branch_bounds,user_targets):
     #Stability : max stabilié possible < min de user -> PRUNE
     if branch_bounds['stability']['max'] < user_targets['stability_min']:
         return False
+    
+    #NEW DIRECTION! FOLDING must!
+    if bilogical_switch==True:
+        if not sliding_window_folding_check(current_sequence):
+            return False 
+         #NEW as well! hooks! N and C Teminus 
+        if not check_charged_ends(current_sequence,target_length):
+            return False
     
     return True #PASSES!
 
@@ -360,7 +427,7 @@ def best_AA(user_targets,target_length,user_target_weights,current_sequence):
 
    # original Score - (abs( Score) * Penalty multiplier)
     DB.sort(key=lambda aa: score_AA(aa,user_targets,target_length,user_target_weights)-
-            (abs(score_AA(aa, user_targets, target_length, user_target_weights)) *(2.0** history.count(aa.code) -1.0)),
+            (abs(score_AA(aa, user_targets, target_length, user_target_weights)) *(1+ history.count(aa.code) -1.0))*3.0,
             reverse=True)
     #50 * number of occurences subtracted: the penalty!
 
@@ -370,18 +437,19 @@ def best_AA(user_targets,target_length,user_target_weights,current_sequence):
 #FINAL RESULT:
 found_AA=[]
 sample_targets={
-    'hydro_min': -40.0,
-    'hydro_max': 0.0,
-    'mass_min': 3400,
-    'mass_max': 3600,
-    'stability_min': 92.0,
-    'binding_min': 90.0
+    'hydro_min': 0.0,  
+    'hydro_max': 18.0,
+    'mass_min': 10500,
+    'mass_max': 11500,
+    'stability_min': 80.0, #stability => aliphatix index
+    'binding_min': 220.0 #binding => polarity + abs(charge)
 }
-target_length=30
+target_length=100
+biological_switch=True
 #
 
 
-weights = user_target_weights(sample_targets, 51) #!!! must precalcuualte before the DFS !!!!
+weights = user_target_weights(sample_targets, target_length) #!!! must precalcuualte before the DFS !!!!
 
 def DFS(current_sequence,target_length,user_targets,res):
     """Input: user_targets: a dict of user preferances for the generated sequence(min_max of Hydro/mass and min stability/binding_affinity,
@@ -418,7 +486,7 @@ def DFS(current_sequence,target_length,user_targets,res):
         return True
     
     branch_bounds=get_branch_and_bound(current_sequence,target_length)
-    if not is_sequence_good(current_sequence,branch_bounds,user_targets):
+    if not is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch):
         stats_for_nerds["branches Pruned"]+=1
 
         clean_seq = [aa.code for aa in current_sequence]
@@ -543,11 +611,11 @@ save_DFS_history_to_csv(DFS_history)
 
 #user_target_weights(user_targets,target_length):
 
-score_test=score_AA(AA_DB['Ile'],sample_targets,51,user_target_weights(sample_targets,51))
+score_test=score_AA(AA_DB['Ile'],sample_targets,target_length,user_target_weights(sample_targets,51))
 print(f"AA SCORE Ile:{score_test}")
 
-print(score_AA(AA_DB['Trp'],sample_targets,51,user_target_weights(sample_targets,51)))
-print(score_AA(AA_DB['Ala'],sample_targets,51,user_target_weights(sample_targets,51)))
+print(score_AA(AA_DB['Trp'],sample_targets,target_length,user_target_weights(sample_targets,51)))
+print(score_AA(AA_DB['Ala'],sample_targets,target_length,user_target_weights(sample_targets,51)))
 
 
 # W A I T this is actually insane! 

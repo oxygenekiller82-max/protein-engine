@@ -1,6 +1,10 @@
-'hydro_min': -0.0,
-    'hydro_max': 100.0,
-    'mass_min': 5000,
-    'mass_max': 4200,
-    'stability_min':10.0,
-    'binding_min':20.0
+sample_targets={
+    'hydro_min': -15.0,
+    'hydro_max': 8.0,
+    'mass_min': 6500,
+    'mass_max': 7000,
+    'stability_min': 75.0,
+    'binding_min': 120.0
+}
+target_length=60
+biological_switch=True

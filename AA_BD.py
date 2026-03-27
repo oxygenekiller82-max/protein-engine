@@ -78,3 +78,28 @@ for p in PROPERTIES:
 
 print("---------------------")
 print(f"LIMITS dict:{LIMITS}")
+
+#CHOU FASMAN -> Folding constraints: 
+#has 'propensity' scores for each AA reaady! 
+PROPENSITIES_DB = {
+                "Ala": {"pa": 1.42, "pb": 0.83},
+                "Arg": {"pa": 0.98, "pb": 0.93},
+                "Asn": {"pa": 0.67, "pb": 0.89},
+                "Asp": {"pa": 1.01, "pb": 0.54},
+                "Cys": {"pa": 0.70, "pb": 1.19},
+                "Glu": {"pa": 1.51, "pb": 0.37},
+                "Gln": {"pa": 1.11, "pb": 1.10},
+                "Gly": {"pa": 0.57, "pb": 0.75},
+                "His": {"pa": 1.00, "pb": 0.87},
+                "Ile": {"pa": 1.08, "pb": 1.60},
+                "Leu": {"pa": 1.21, "pb": 1.30},
+                "Lys": {"pa": 1.14, "pb": 0.74},
+                "Met": {"pa": 1.45, "pb": 1.05},
+                "Phe": {"pa": 1.13, "pb": 1.38},
+                "Pro": {"pa": 0.57, "pb": 0.55},
+                "Ser": {"pa": 0.77, "pb": 0.75},
+                "Thr": {"pa": 0.83, "pb": 1.19},
+                "Trp": {"pa": 1.08, "pb": 1.37},
+                "Tyr": {"pa": 0.69, "pb": 1.47},
+                "Val": {"pa": 1.06, "pb": 1.70}   
+}

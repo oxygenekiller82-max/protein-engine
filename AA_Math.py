@@ -5,6 +5,8 @@ from AA_BD import BULKY_AAS
 import random
 import csv
 
+DFS_NODES_LIMIT=1_000_000
+
 def calculate_hydrophobicity(sequence):
     """ 1/n * Sum(Hi): returns hydrophobicity result of the list of AA"""
     if len(sequence)==0: return 0 
@@ -64,8 +66,8 @@ def calculate_stability(sequence,user_target_length):
 #Dummy test: 
 from AA_BD import AA_DB
 
-sequence=[AA_DB["Ala"],AA_DB["Val"],AA_DB["Trp"],AA_DB["Phe"]]
-print(f"Stability AI average: {calculate_stability(sequence,len(sequence))}")
+#sequence=[AA_DB["Ala"],AA_DB["Val"],AA_DB["Trp"],AA_DB["Phe"]]
+#print(f"Stability AI average: {calculate_stability(sequence,len(sequence))}")
 
 
 def calculate_binding_affinity(sequence):
@@ -100,7 +102,7 @@ def normalize_aa(AA):
     return normalized_AA
 
 #Test
-print(f"Normalized AA Test: {normalize_aa(AA_DB["Trp"])}")
+#print(f"Normalized AA Test: {normalize_aa(AA_DB["Trp"])}")
 
 
 #Sliding Window -> Check pour les 3 AA récents ajoutés 
@@ -188,18 +190,20 @@ def check_charged_ends(current_sequence,target_length):
     return True
 
 #THIRD biological constraint: 
-def check_net_charge(current_sequence,target):
+def check_net_charge(current_sequence,target,target_length):
     total_charge=sum(AA.charge for AA in current_sequence)
 
     if(len(current_sequence)==target_length):
         return target['net_charge_target']
+    
+    pass #naah
 
 
 
 #Test 
-sequence2=[AA_DB["Trp"],AA_DB["Phe"],AA_DB["Tyr"]]
-print("----------------------------")
-print(sliding_window_check(sequence2))
+#sequence2=[AA_DB["Trp"],AA_DB["Phe"],AA_DB["Tyr"]]
+#print("----------------------------")
+#print(sliding_window_check(sequence2))
 
 #BRANCH AND BOUND! 
 #binding affinity = fonction de : Polarité + charge -> Max score pour une séquence de longeur K= 
@@ -246,8 +250,8 @@ def worst_AA_binding_affinity():
       
     return last_AA_checked
     
-print(best_AA_binding_affinity())
-print(worst_AA_binding_affinity())
+#print(best_AA_binding_affinity())
+#print(worst_AA_binding_affinity())
 
 
 def get_branch_and_bound(current_sequence,target_length):
@@ -304,13 +308,13 @@ branch_bound_test_sequence=[
     AA_DB['Ala'], AA_DB['Glu'], AA_DB['Leu'], 
     AA_DB['Arg'], AA_DB['Gly'], AA_DB['Lys'], AA_DB['Leu']
 ]
-print("---- BRANCH --- AND --- BOUND YEEHAWW")
-print(get_branch_and_bound(branch_bound_test_sequence,51))
-print("-------------------------------------")
+#print("---- BRANCH --- AND --- BOUND YEEHAWW")
+#print(get_branch_and_bound(branch_bound_test_sequence,51))
+#print("-------------------------------------")
 #WOW
 
 
-def is_sequence_good(current_sequence,branch_bounds,user_targets,bilogical_switch):
+def is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch,target_length):
     """a big True/False check: tells DFS Continue or PRUNE!"""
 
     #SLIDING WINDOW! 
@@ -335,7 +339,7 @@ def is_sequence_good(current_sequence,branch_bounds,user_targets,bilogical_switc
         return False
     
     #NEW DIRECTION! FOLDING must!
-    if bilogical_switch==True:
+    if biological_switch==True:
         if not sliding_window_folding_check(current_sequence):
             return False 
          #NEW as well! hooks! N and C Teminus 
@@ -345,15 +349,15 @@ def is_sequence_good(current_sequence,branch_bounds,user_targets,bilogical_switc
     return True #PASSES!
 
 
-stats_for_nerds={"branches Pruned":0,
-                 "function calls": 0
-                }
-DFS_history=[]
+#stats_for_nerds={"branches Pruned":0,
+#                 "function calls": 0
+#                }
+#DFS_history=[]
 
-def add_to_history(DFS_history,action,current_sequence,AA_added="None"):
+def add_to_history(DFS_history,action,current_sequence,stats_for_nerds,AA_added="None"):
     """capture de l'algorithme, l'ajout aréps Ajout/Prune action"""
     frame={
-        "step":stats_for_nerds["function calls"],
+        "step":stats_for_nerds["function_calls"],
         "action":action,
         "sequence":current_sequence.copy(), #LISTES par addresse.. they will chagen ->.copy = snapshot won't change omg
         "last_AA_added":AA_added,
@@ -427,7 +431,7 @@ def best_AA(user_targets,target_length,user_target_weights,current_sequence):
 
    # original Score - (abs( Score) * Penalty multiplier)
     DB.sort(key=lambda aa: score_AA(aa,user_targets,target_length,user_target_weights)-
-            (abs(score_AA(aa, user_targets, target_length, user_target_weights)) *(1+ history.count(aa.code) -1.0))*3.0,
+            (abs(score_AA(aa, user_targets, target_length, user_target_weights)) *(1+ history.count(aa.code) -1.0))*4.0,
             reverse=True)
     #50 * number of occurences subtracted: the penalty!
 
@@ -435,23 +439,26 @@ def best_AA(user_targets,target_length,user_target_weights,current_sequence):
 
 
 #FINAL RESULT:
-found_AA=[]
-sample_targets={
-    'hydro_min': 0.0,  
-    'hydro_max': 18.0,
-    'mass_min': 10500,
-    'mass_max': 11500,
-    'stability_min': 80.0, #stability => aliphatix index
-    'binding_min': 220.0 #binding => polarity + abs(charge)
-}
-target_length=100
-biological_switch=True
+#found_AA=[]
+#sample_targets={
+#    'hydro_min': 8.25,  
+#    'hydro_max': 8.35,
+#    'mass_min': 10500,
+#    'mass_max': 11500,
+#    'stability_min': 80.0, #stability => aliphatix index
+#    'binding_min': 220.0 #binding => polarity + abs(charge)
+#}
+#target_length=100
+#biological_switch=True
 #
 
 
-weights = user_target_weights(sample_targets, target_length) #!!! must precalcuualte before the DFS !!!!
+#weights = user_target_weights(sample_targets, target_length) #!!! must precalcuualte before the DFS !!!!
 
-def DFS(current_sequence,target_length,user_targets,res):
+
+def DFS(current_sequence,target_length,user_targets,res,
+        DFS_history,stats,weights,biological_switch
+        ):
     """Input: user_targets: a dict of user preferances for the generated sequence(min_max of Hydro/mass and min stability/binding_affinity,
               target_length: Integer of desired sequence length,
               current_sequence should be an empty list [] to build upon
@@ -463,14 +470,26 @@ def DFS(current_sequence,target_length,user_targets,res):
     #base case: déja seqeunce de logneur target_len trouvée
 
 
-    stats_for_nerds["function calls"]+=1
-    print(f"NODES VISITIED: {stats_for_nerds["function calls"]}")
+    stats["function_calls"]+=1
+    #IO is expensive...
+    if stats["function_calls"]% 100_000 ==0 :
+        print(f"NODES VISITIED: {stats["function_calls"]}")
+        
 
     if(len(res))>0: #is res the result final list done -> stop
         return True
+    
+    #LIMIT: ----------
+    if stats["function_calls"]>DFS_NODES_LIMIT:
+        res.clear() #no need for any partial sequence -> just the failed message
+        res.append("LIMIT_REACHED")
+        #ADD TO LOG i forgor
+        #DFS_history,action,current_sequence,AA_added="None"
+        add_to_history(DFS_history,"LIMIT_REACHED",[],stats) 
+        return True #STOP
 
     if len(current_sequence)==target_length:
-        res.append(list(current_sequence)) #ALL VALID LISTS! 
+        res.extend(list(current_sequence)) #ALL VALID LISTS! 
         #Why ? -> res = passage par addresse en python !!
         #when it hits level 51 in the tree -> finds AA -> adds it and good 
         #goes back to lelve 50 -> resumes when it stopped in the loop -> tries the next AA, if 
@@ -479,22 +498,24 @@ def DFS(current_sequence,target_length,user_targets,res):
         clean_seq = [aa.code for aa in current_sequence]
 
         if len(current_sequence)>0: #current_sequence[-1]) in an empty list ...
-            add_to_history(DFS_history,"DONE",clean_seq,clean_seq[-1]) 
+            add_to_history(DFS_history,"DONE",clean_seq,stats,clean_seq[-1]) 
         else:
-            add_to_history(DFS_history,"DONE",clean_seq,[]) 
+            add_to_history(DFS_history,"DONE",clean_seq,[],stats) 
             
         return True
     
     branch_bounds=get_branch_and_bound(current_sequence,target_length)
-    if not is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch):
-        stats_for_nerds["branches Pruned"]+=1
+    #                       current_sequence,branch_bounds,user_targets,biological_switch,target_length
+    if not is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch,target_length):
+        stats["branches_pruned"]+=1
 
         clean_seq = [aa.code for aa in current_sequence]
 
         if len(current_sequence)>0: #current_sequence[-1]) in an empty list ...
-            add_to_history(DFS_history,"PRUNE",clean_seq,clean_seq[-1]) 
+            #DFS_history,action,current_sequence,stats_for_nerds,AA_added="None"
+            add_to_history(DFS_history,"PRUNE",clean_seq,stats,clean_seq[-1]) 
         else:
-            add_to_history(DFS_history,"PRUNE",clean_seq,[]) 
+            add_to_history(DFS_history,"PRUNE",clean_seq,[],stats) 
         return False #PRUNE THIS BRANCH
     
     #exploration  NO LONGER RANDOM !!!!
@@ -506,8 +527,10 @@ def DFS(current_sequence,target_length,user_targets,res):
         #ADD AA -> ADD TO HISTORY! 
         
         clean_seq=[aa.code for aa in current_sequence]+[AA.code] #instead of current_sequence+[AA.code]
-        add_to_history(DFS_history,"ADD",clean_seq,AA.code)
-        if DFS(current_sequence+[AA],target_length,user_targets,res): #ALSO ONLY RETURNS ONE SEQUENCE, no more all sorry
+        add_to_history(DFS_history,"ADD",clean_seq,stats,AA.code)
+        if DFS(current_sequence+[AA],target_length,user_targets,res,
+               DFS_history,stats,weights,biological_switch
+               ): #ALSO ONLY RETURNS ONE SEQUENCE, no more all sorry
             return True #stops if finds sequence! 
         
 
@@ -524,60 +547,64 @@ def validate_user_targets(user_targets,target_length):
     #Min > max -> DFS won't stop
     if (user_targets['hydro_min']> user_targets['hydro_max']):
         print("Cannot start search: Minimum targets cannot be greater than maximum ones")
-        return False
+        return False, "Cannot start search: Minimum targets cannot be greater than maximum ones"
     
     if(user_targets['mass_min']> user_targets['mass_max']):
         print("Cannot start search: Minimum targets cannot be greater than maximum ones")
-        return False
+        return False, "Cannot start search: Minimum targets cannot be greater than maximum ones"
 
     if (target_length<=0):
         print("Cannot start search: length must be strictly greater than zero")
-        return False
-
+        return False, "Cannot start search: length must be strictly greater than zero"
+    
+    if user_targets['mass_min'] < 0 or user_targets['mass_max'] <= 0:
+        return False, "Cannot start search: molecular mass must be strictll greater than zero."
+    
     #Check -> is the sequence physically possible given the consttraints ?
     #DFS DOES check these but it won't stop if so just moves to the next branch so..
 
     if user_targets['hydro_max']<(target_length*LIMITS['hydro']['min']):
         print(f"Cannot start search: Hydrophobicity should be at least{target_length*LIMITS['hydro']['min']}")
-        return False
+        return False, f"Cannot start search: Hydrophobicity should be at least{target_length*LIMITS['hydro']['min']}"
     
     if user_targets['hydro_min'] > (target_length * LIMITS['hydro']['max']):
         print(f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']}")
-        return False
+        return False, f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']}"
     
     if user_targets['mass_max'] < (target_length * LIMITS['molecular_mass']['min']):
         print(f"Cannot start search: Molecular Mass should be at least{target_length*LIMITS['molecular_mass']['min']}")
-        return False
+        return False, f"Cannot start search: Molecular Mass should be at least{target_length*LIMITS['molecular_mass']['min']}"
     
     if user_targets['mass_min'] > (target_length * LIMITS['molecular_mass']['max']):
         print(f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']}")
-        return False
+        return False, f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']}"
     
     if user_targets['binding_min'] > (target_length*calculate_binding_affinity([best_AA_binding_affinity()])):
         print(f"Cannot start search: Binding Affinity at most is {target_length*calculate_binding_affinity([best_AA_binding_affinity()])}")
-        return False
+        return False,f"Cannot start search: Binding Affinity at most is {target_length*calculate_binding_affinity([best_AA_binding_affinity()])}"
     
     #(k*LIMITS['ali_weight']['min']/target_length)*100, k = target length here..
     if user_targets['stability_min']>(LIMITS['ali_weight']['max']*100):
         print(f"Cannot start search: Stability at most is {LIMITS['ali_weight']['max']*100}")
-        return False
+        return False,f"Cannot start search: Stability at most is {LIMITS['ali_weight']['max']*100}"
 
-    return True
+    #now it's a tuple.. amazing i'm definitely sane
+    return True,None
 
 
 #Test
 
-if (validate_user_targets(sample_targets,target_length)):
-    DFS([],target_length,sample_targets,found_AA)
+#if (validate_user_targets(sample_targets,target_length)):
+#    DFS([],target_length,sample_targets,found_AA)
 
-print(f"WEIGHTS:{user_target_weights(sample_targets,target_length)}")
+#print(f"WEIGHTS:{user_target_weights(sample_targets,target_length)}")
 
-print("****************************************")
+#print("****************************************")
 
-if found_AA:
-    print(f"AAND WE GOT:{found_AA[0]}")
+#if found_AA:
+#    print(f"AAND WE GOT:{found_AA[0]}")
 
-print(stats_for_nerds)
+#print(stats_for_nerds)
 
 #Exporting the DFS History to a CSV!!! file: 
 
@@ -607,15 +634,15 @@ def save_DFS_history_to_csv(history,filename="dfs_results.cvs"):
                 )
             f.write(line)
 
-save_DFS_history_to_csv(DFS_history) 
+#save_DFS_history_to_csv(DFS_history) 
 
 #user_target_weights(user_targets,target_length):
 
-score_test=score_AA(AA_DB['Ile'],sample_targets,target_length,user_target_weights(sample_targets,51))
-print(f"AA SCORE Ile:{score_test}")
+#score_test=score_AA(AA_DB['Ile'],sample_targets,target_length,user_target_weights(sample_targets,51))
+#print(f"AA SCORE Ile:{score_test}")
 
-print(score_AA(AA_DB['Trp'],sample_targets,target_length,user_target_weights(sample_targets,51)))
-print(score_AA(AA_DB['Ala'],sample_targets,target_length,user_target_weights(sample_targets,51)))
+#print(score_AA(AA_DB['Trp'],sample_targets,target_length,user_target_weights(sample_targets,51)))
+#print(score_AA(AA_DB['Ala'],sample_targets,target_length,user_target_weights(sample_targets,51)))
 
 
 # W A I T this is actually insane! 
@@ -626,6 +653,110 @@ print(score_AA(AA_DB['Ala'],sample_targets,target_length,user_target_weights(sam
 #4- 46mer Crambin
 #5 51mer inslin 
 
+if __name__ == "__main__":
+    print("PROGRAM TEST, not from the API stupid API runs this automtically")
+    #variables need to be local to this function.. oh big yikes...
+    found_AA = []
+    DFS_history = []
+
+    stats_for_nerds = {
+        "branches_pruned": 0,
+        "function_calls": 0
+    }
+
+    sample_targets_local = {
+        "hydro_min": -15.0,
+        "hydro_max": 5.0,
+        "mass_min": 6200,
+        "mass_max": 6800,
+        "stability_min": 75.0,
+        "binding_min": 120.0
+    }
+
+    target_length_local = 60
+    biological_switch_local = True
+
+    weights_local = user_target_weights(sample_targets_local, target_length_local)
+
+    is_valid , erorr_msg = validate_user_targets(sample_targets_local,target_length_local)
+
+    if is_valid:
+        DFS([], target_length_local, sample_targets_local, found_AA,
+            DFS_history,stats_for_nerds,weights_local,biological_switch_local
+            )
+    else:
+        print(erorr_msg)
+        
+
+    if found_AA:
+        print(f"AAND WE GOT: {found_AA}")
+    
+    print(stats_for_nerds)
+    save_DFS_history_to_csv(DFS_history) 
+
+
+
+#API 
+def start_search(user_targets,target_length,biological_switch=True):
+    """API calls function"""
+
+    #CHECK user configuration: 
+    is_valid , erorr_msg = validate_user_targets(user_targets,target_length)
+    found_AA_local = []
+    DFS_history_local = []
+    
+    stats_for_nerds_local = {
+        "branches_pruned": 0,
+        "function_calls": 0
+    }
+
+
+    if not(is_valid):
+        return{
+            "status": "Configuration Error",
+            "final_sequence": [],
+            "history":DFS_history_local, #will be an empty list anyways
+            "message":erorr_msg,
+            "stats":stats_for_nerds_local
+        }
+
+
+    weights_local = user_target_weights(user_targets, target_length)
+    DFS([],target_length,user_targets,found_AA_local,
+        DFS_history_local,stats_for_nerds_local,weights_local,biological_switch
+        )
+    
+
+    #LIMIT message 
+    if "LIMIT_REACHED" in found_AA_local:
+        DFS_history_local.clear()
+        
+        return {
+            "status": "length_error",
+            "final_sequence": [],
+            "history":DFS_history_local, #will be an empty list anyways
+            "message":"Search Limit exceeded. Try relaxing the constraints",
+            "stats":stats_for_nerds_local
+        }
+
+
+    if found_AA_local:
+        return {
+            "status":"done",
+            "final_sequence": [AA.code for AA in found_AA_local] if found_AA_local else None,
+            "history": DFS_history_local, #LIST + POINTER HEHE ! API will just get the POINTER YES SAVE MY RAM
+            "message":"Successfuly found a sequence!!",
+            "stats": stats_for_nerds_local
+        }
+    
+    #WHAT IF -> searched a tiny space but found nothing ?
+    return {
+        "status": "nothing_found",
+        "final_sequence": [],
+        "history":[],
+        "message": "No valid sequence exists for these constraints.",
+        "stats": stats_for_nerds_local
+    }
 
 
 #Validation scientifique: 

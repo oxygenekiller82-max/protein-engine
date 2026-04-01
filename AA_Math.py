@@ -500,7 +500,7 @@ def DFS(current_sequence,target_length,user_targets,res,
         if len(current_sequence)>0: #current_sequence[-1]) in an empty list ...
             add_to_history(DFS_history,"DONE",clean_seq,stats,clean_seq[-1]) 
         else:
-            add_to_history(DFS_history,"DONE",clean_seq,[],stats) 
+            add_to_history(DFS_history,"DONE",clean_seq,[],stats) ### 
             
         return True
     
@@ -558,30 +558,30 @@ def validate_user_targets(user_targets,target_length):
         return False, "Cannot start search: length must be strictly greater than zero"
     
     if user_targets['mass_min'] < 0 or user_targets['mass_max'] <= 0:
-        return False, "Cannot start search: molecular mass must be strictll greater than zero."
+        return False, "Cannot start search: molecular mass must be strictly greater than zero."
     
     #Check -> is the sequence physically possible given the consttraints ?
     #DFS DOES check these but it won't stop if so just moves to the next branch so..
 
     if user_targets['hydro_max']<(target_length*LIMITS['hydro']['min']):
-        print(f"Cannot start search: Hydrophobicity should be at least{target_length*LIMITS['hydro']['min']}")
-        return False, f"Cannot start search: Hydrophobicity should be at least{target_length*LIMITS['hydro']['min']}"
+        print(f"Cannot start search: Hydrophobicity should be at least {target_length*LIMITS['hydro']['min']:.2f}")
+        return False, f"Cannot start search: Hydrophobicity should be at least {target_length*LIMITS['hydro']['min']:.2f}"
     
     if user_targets['hydro_min'] > (target_length * LIMITS['hydro']['max']):
-        print(f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']}")
-        return False, f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']}"
+        print(f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']:.2f}")
+        return False, f"Cannot start search: Hydrophobicity for this length is at most {target_length * LIMITS['hydro']['max']:.2f}"
     
     if user_targets['mass_max'] < (target_length * LIMITS['molecular_mass']['min']):
-        print(f"Cannot start search: Molecular Mass should be at least{target_length*LIMITS['molecular_mass']['min']}")
-        return False, f"Cannot start search: Molecular Mass should be at least{target_length*LIMITS['molecular_mass']['min']}"
+        print(f"Cannot start search: Molecular Mass should be at least {target_length*LIMITS['molecular_mass']['min']:.2f}")
+        return False, f"Cannot start search: Molecular Mass should be at least {target_length*LIMITS['molecular_mass']['min']:.2f}"
     
     if user_targets['mass_min'] > (target_length * LIMITS['molecular_mass']['max']):
-        print(f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']}")
-        return False, f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']}"
+        print(f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']:.2f}")
+        return False, f"Cannot start search: Molecular Mass is for this length is at most {target_length * LIMITS['molecular_mass']['max']:.2f}"
     
     if user_targets['binding_min'] > (target_length*calculate_binding_affinity([best_AA_binding_affinity()])):
-        print(f"Cannot start search: Binding Affinity at most is {target_length*calculate_binding_affinity([best_AA_binding_affinity()])}")
-        return False,f"Cannot start search: Binding Affinity at most is {target_length*calculate_binding_affinity([best_AA_binding_affinity()])}"
+        print(f"Cannot start search: Binding Affinity is at most {target_length*calculate_binding_affinity([best_AA_binding_affinity()]):.2f}")
+        return False,f"Cannot start search: Binding Affinity at is at most {target_length*calculate_binding_affinity([best_AA_binding_affinity()]):.2f}"
     
     #(k*LIMITS['ali_weight']['min']/target_length)*100, k = target length here..
     if user_targets['stability_min']>(LIMITS['ali_weight']['max']*100):
@@ -758,8 +758,6 @@ def start_search(user_targets,target_length,biological_switch=True):
         "stats": stats_for_nerds_local
     }
 
-
-#Validation scientifique: 
 
 
 

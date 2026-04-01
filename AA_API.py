@@ -50,10 +50,8 @@ def generate():
 
         user_targets=data.get('targets',data)
 
-        if 'targets' in user_targets:
-            targets=user_targets['targets']
+        targets = data.get('targets', {})
 
-        print(f"DEBUG TARGETS: {targets}")
         #STREAMLINE if done
         result=start_search(targets, length, biological_switch)
         status= result.get("status")

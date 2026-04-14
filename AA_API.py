@@ -5,6 +5,10 @@ from AA_Math import start_search
 
 from flask import Flask, request, jsonify, Response
 
+from AA_Validation import compare_sequences
+from AA_Validation import getSequenceData
+from AA_Validation import reverse_mapping
+
 app=Flask(__name__)
 
 #IF sueccess -> STERAMILE the potentially 499K dicts file via the API
@@ -102,7 +106,60 @@ def generate():
         #print(json.dumps({"error":str(e)}))
         print(f"Error occurred: {e}") 
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/generate_arrays',methods=['POST'])
+def get_comparsion_data(): 
+    #JSON -> body data
+    data=request.get_json()
+
+    #3letter ARRAYS now
+    target_seq=data.get('target_seq')
+    generated_seq=data.get('generated_seq')
+
+    #jusst checking...
+    if not target_seq or not generated_seq:
+        return jsonify({"error": "Missing sequences."}), 400
     
+    try: 
+        #target 3->1 letter 
+        target_seq_final = "".join([reverse_mapping[AA] for AA in target_seq])
+        #generated 3->1 letter 
+        generated_seq_final = "".join([reverse_mapping[AA] for AA in generated_seq])
+
+        results = compare_sequences(target_seq, generated_seq)
+
+        return jsonify(results)
+    
+    except KeyError as e: 
+        return jsonify({"error": f"Invalid Amino Acid: {str(e)}"}), 400
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/get_peptide_stats', methods=['POST'])
+def get_peptide_stats():
+    data = request.get_json('sequence') #post body 
+
+    sequence=data.get('sequence')#ARRAY ! of 3 letter codes
+
+    if not sequence:
+        return jsonify({"error": "No sequence found"}), 400
+    
+    try:
+        #reverse mapping 3 letter -> 1 letter 
+        sequence_string="".join([reverse_mapping[AA] for AA in sequence ])
+
+        stats = getSequenceData(sequence_string.upper())
+        return jsonify(stats)
+    
+    except KeyError:
+        return jsonify({"error": "Invalid Amino Acid code found"}), 400
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__=="__main__":
     #main()
     app.run(port=5000,debug=False,use_reloader=False)
@@ -110,3 +167,6 @@ if __name__=="__main__":
 #why the if main ? 
 #-> import a file in python => IT RUNS all the code in it 
 #with this __main__ -> won't just start running the DFS file lol
+
+
+

@@ -30,6 +30,14 @@ DB_mapping={
         'V': 'Val'
     }
 
+
+#REVERSE MAPPING: 3letter code -> 1 letter code :
+#Dictionary comprehension exists...
+reverse_mapping ={v: k for k, v in DB_mapping.items()} #v:k ->old value = new key, old key = new value
+
+#iterating through orignal mapping: for k, v in DB_mapping.items() 
+
+
 # 1 and 3 letter codes -> point to same objects in AA_BD
 for one_letter_code, three_letter_code in DB_mapping.items():
     if three_letter_code in AA_DB:
@@ -61,10 +69,36 @@ def getSequenceData(sequence):
     
 
 print("/_/_/_/_//_/_/_/_/_/")
-print(getSequenceData("TDNEPMQKSLCIHYVFGARTTEDNLP"))
+#print(getSequenceData("TDNEPMQKSLCIHYVFGARTTEDNLP"))
+
+print(getSequenceData("MSTVEEDSDTVTVETVNSVTLTQDTEGNLILHCPQNEADEIDSEDSIEPPHKRLCLSSEDDQSIDDSTPCISVVALPLSENDQSFEVTMTATTEVADDEVTEGTVTQIQILQNEQLDEISPLGNEEVSAVSQAWFTTKEDKDSLTNKGHKWKQGMWSKEEIDILMNNIERYLKARGIKDATEIIFEMSKDERKDFYRTIAWGLNRPLFAVYRRVLRMYDDRNHVGKYTPEEIEKLKELRIKHGNDWATIGAALGRSASSVKDRCRLMKDTCNTGKWTEEEEKRLAEVVHELTSTEPGDIVTQGVSWAAVAERVGTRSEKQCRSKWLNYLNWKQSGGTEWTKEDEINLILRIAELDVADENDINWDLLAEGWSSVRSPQWLRSKWWTIKRQIANHKDVSFPVLIKGLKQLHENQKNNPTLLENKSGSGVPNSNTNSSVQHVQIRVARLEDNTAISSSPMAALQIPVQITHVSSADSPATVDSETITLNSGTLQTFEILPSFHLQPTGTPGTYLLQTSSSQGLPLTLTASPTVTLTAAAPASPEQIIVHALSPEHLLNTSDNVTVQCHTPRVIIQTVATEDITSSISQAELTVDSDIQSSDFPEPPDALEADTFPDEIHHPKMTVEPSFNDAHVSKFSDQNSTELMNSVMVRTEEEISDTDLKQEESPSDLASAYVTEGLESPTIEEQVDQTIDDETILIVPSPHGFIQASDVIDTESVLPLTTLTDPILQHHQEESNIIGSSLGSPVSEDSKDVEDLVNCH"))
+
+#The legendary DMTF1 , the one that inspired this project! 
+#'hydro': -0.5335526315789474, 'mass': 98145.35, 'binding': 6921.9, 'stability': 83.74, 'length': 760
+#i wonder if our program will even run lmao 760 ??
+#
+
+
+
+#return % of similarity from the arrays 
+def calculate_auc_similarity(target_array,res_array): 
+
+    target_auc = np.trapz(np.abs(target_array))
+    res_auc = np.trapz(np.abs(res_array))
+
+    if target_auc == 0:
+        return 0.0
+    
+    similarity = (1 - abs(target_auc - res_auc) / target_auc) * 100
+    return round(float(similarity), 2)
+
+
+
 
 #Charts ? 
 def compare_sequences(target_seq, res_sequence):
+    """returns TWO arrays of  for each property, one for the original sequence
+        and one for the DFS result sequence, must input both"""
     #properties: hydro for testing 
     target_hydro = [AA_DB[AA].hydro for AA in target_seq]
     res_hydro= [AA_DB[AA].hydro for AA in res_sequence]
@@ -73,35 +107,53 @@ def compare_sequences(target_seq, res_sequence):
     target_stability = [calculate_stability([AA_DB[AA]],1) for AA in target_seq]
     res_stability= [calculate_stability([AA_DB[AA]],1) for AA in res_sequence]
 
-    #AREA UNDER CURVE ???#-> trapezoidal area Auc = area under curve
-    target_auc = np.trapz(target_stability)
-    dfs_auc = np.trapz(res_stability)
-    similarity = (1 - abs(target_auc - dfs_auc) / target_auc) * 100
-    print(f"Structural Bio-Similarity: {similarity:.2f}%")
+    #Binding
+    target_binding=[calculate_binding_affinity([AA_DB[AA]]) for AA in target_seq]
+    res_binding=[calculate_binding_affinity([AA_DB[AA]]) for AA in res_sequence]
 
-    #let's do for hydro!
-    target_hydro_auc = np.trapz(np.abs(target_hydro))
-    dfs_hydro_auc = np.trapz(np.abs(res_hydro))
-    hydro_similarity = (1 - abs(target_hydro_auc - dfs_hydro_auc) / target_hydro_auc) * 100
-    print(f"Hydropathy Bio-Similarity: {hydro_similarity:.2f}%")
+    #Mass 
+    target_mass=[calculate_molecular_mass([AA_DB[AA]]) for AA in target_seq]
+    res_mass=[calculate_molecular_mass([AA_DB[AA]]) for AA in res_sequence]
+
+    #AUC SIMILARITY 
+    hydro_sim = calculate_auc_similarity(target_hydro,res_hydro)
+    stability_sim = calculate_auc_similarity(target_stability, res_stability)
+    molecular_mass_sim = calculate_auc_similarity(target_mass, res_mass)
+    binding_sim=calculate_auc_similarity(target_binding, res_binding)
 
 
-    indices = range(len(target_seq))
-    plt.figure(figsize=(10, 5))
 
-    plt.plot(indices, target_stability, label='Target Sequence', color='blue', linewidth=2)
-    plt.plot(indices, res_stability, label='DFS Result', color='orange', linestyle='--', linewidth=2)
+    #plt.figure(figsize=(10, 5))
+
+    #plt.plot(indices, target_binding, label='Target Sequence', color='blue', linewidth=2)
+    #plt.plot(indices, res_binding, label='DFS Result', color='orange', linestyle='--', linewidth=2)
     
-    plt.title("Hydropathy Profile Comparison")
-    plt.xlabel("Amino Acid Position")
-    plt.ylabel("Hydropathy Score")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    #plt.title("Hydropathy Profile Comparison")
+    #plt.xlabel("Amino Acid Position")
+    #plt.ylabel("Hydropathy Score")
+    #plt.legend()
+    #plt.grid(True, alpha=0.3)
     
-    plt.show()
+    #plt.show()
 
-compare_sequences("KERSWFVNDYQLAMPTRICHGAKLDV",
-                  "TDNEPMQKSLCIHYVFGARTTEDNLP")
+    #let's just make it return the 8 arrays.
+    return {
+        "target_hydro": target_hydro, 
+        "res_hydro":res_hydro, 
+        "target_stability": target_stability,
+        "res_stability": res_stability,
+        "target_binding": target_binding,
+        "res_binding": res_binding,
+        "target_mass": target_mass,
+        "res_mass": res_mass,
+
+        "hydro_sim":hydro_sim,
+        "stability_sim":stability_sim,
+        "molecular_mass_sim":molecular_mass_sim,
+        "binding_sim":binding_sim,
+    }
 
 
-    
+
+#compare_sequences("KERSWFVNDYQLAMPTRICHGAKLDV",
+#                  "TDNEPMQKSLCIHYVFGARTTEDNLP")

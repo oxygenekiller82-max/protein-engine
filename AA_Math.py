@@ -156,7 +156,7 @@ def sliding_window_folding_check(current_sequence):
     score_pa=sum(PROPENSITIES_DB[aa.code]['pa'] for aa in window) / window_size
     score_pb=sum(PROPENSITIES_DB[aa.code]['pb'] for aa in window) / window_size
 
-    if score_pa <1.0 and score_pb <1.04: #1.0 = average 
+    if score_pa <1.04 and score_pb <1.04: #1.0 = average 
         return False
     
     return True
@@ -188,15 +188,6 @@ def check_charged_ends(current_sequence,target_length):
             return False #ONE at least one charged AA at the end
         
     return True
-
-#THIRD biological constraint: 
-def check_net_charge(current_sequence,target,target_length):
-    total_charge=sum(AA.charge for AA in current_sequence)
-
-    if(len(current_sequence)==target_length):
-        return target['net_charge_target']
-    
-    pass #naah
 
 
 
@@ -315,38 +306,45 @@ branch_bound_test_sequence=[
 
 
 def is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch,target_length):
-    """a big True/False check: tells DFS Continue or PRUNE!"""
+    """a big True/False check: tells DFS Continue or PRUNE!
+    NEW-> returns also reason for Pruning"""
 
     #SLIDING WINDOW! 
     if not sliding_window_check(current_sequence):
-        return False
+        return False, "Steric hindrance exception"
 
     #masse moléculaire: masse lightest already heavier than user target -> PRUNE
     #or masse heaviest already lighter than user target -> PRUNE
-    if branch_bounds['molecular_mass']['min']>user_targets['mass_max'] or  branch_bounds['molecular_mass']['max'] < user_targets['mass_min']: 
-        return False
+    if branch_bounds['molecular_mass']['min']>user_targets['mass_max']:  
+        return False, "molecular mass exception: Too heavy"
+    
+    if  branch_bounds['molecular_mass']['max'] < user_targets['mass_min']: 
+        return False, "molecular mass exception: Too Light"
     
     #Hydro: 
-    if branch_bounds['hydro']['max'] < user_targets['hydro_min'] or branch_bounds['hydro']['min'] > user_targets['hydro_max']:
-        return False
+    if branch_bounds['hydro']['max'] < user_targets['hydro_min']: 
+        return False,"haydrophobicity exception: Too low"
+    
+    if branch_bounds['hydro']['min'] > user_targets['hydro_max']:
+        return False,"haydrophobicity exception: Too high"
     
     #binding affinity: max affinity possible < min de user -> PRUNE
     if branch_bounds['binding_affinity']['max'] < user_targets['binding_min']:
-        return False
+        return False,"Binding affinity exception: too low"
     
     #Stability : max stabilié possible < min de user -> PRUNE
     if branch_bounds['stability']['max'] < user_targets['stability_min']:
-        return False
+        return False,"Stability exception: too low"
     
     #NEW DIRECTION! FOLDING must!
     if biological_switch==True:
         if not sliding_window_folding_check(current_sequence):
-            return False 
+            return False,"Folding exception: won't fold" 
          #NEW as well! hooks! N and C Teminus 
         if not check_charged_ends(current_sequence,target_length):
-            return False
+            return False,"charged ends exception"
     
-    return True #PASSES!
+    return True,"-" #PASSES!
 
 
 #stats_for_nerds={"branches Pruned":0,
@@ -354,13 +352,14 @@ def is_sequence_good(current_sequence,branch_bounds,user_targets,biological_swit
 #                }
 #DFS_history=[]
 
-def add_to_history(DFS_history,action,current_sequence,stats_for_nerds,AA_added="None"):
-    """capture de l'algorithme, l'ajout aréps Ajout/Prune action"""
+def add_to_history(DFS_history,action,current_sequence,stats_for_nerds,AA_added="None",reason="-"):
+    """capture de l'algorithme, l'ajout aréps Ajout/Prune action + justification de Prune"""
     frame={
         "step":stats_for_nerds["function_calls"],
         "action":action,
         "sequence":current_sequence.copy(), #LISTES par addresse.. they will chagen ->.copy = snapshot won't change omg
         "last_AA_added":AA_added,
+        "prune_reason": reason,
         "level":len(current_sequence) 
     }
     DFS_history.append(frame)
@@ -506,14 +505,15 @@ def DFS(current_sequence,target_length,user_targets,res,
     
     branch_bounds=get_branch_and_bound(current_sequence,target_length)
     #                       current_sequence,branch_bounds,user_targets,biological_switch,target_length
-    if not is_sequence_good(current_sequence,branch_bounds,user_targets,biological_switch,target_length):
+    is_good_check,prune_reason=is_sequence_good(current_sequence, branch_bounds, user_targets, biological_switch, target_length)
+    if not is_good_check:
         stats["branches_pruned"]+=1
 
         clean_seq = [aa.code for aa in current_sequence]
 
         if len(current_sequence)>0: #current_sequence[-1]) in an empty list ...
             #DFS_history,action,current_sequence,stats_for_nerds,AA_added="None"
-            add_to_history(DFS_history,"PRUNE",clean_seq,stats,clean_seq[-1]) 
+            add_to_history(DFS_history,"PRUNE",clean_seq,stats,clean_seq[-1],reason=prune_reason) 
         else:
             add_to_history(DFS_history,"PRUNE",clean_seq,[],stats) 
         return False #PRUNE THIS BRANCH
@@ -610,13 +610,13 @@ def validate_user_targets(user_targets,target_length):
 
 def save_DFS_history_to_csv(history,filename="dfs_results.cvs"):
     #COLUMNS HEADERS! 
-    fields=["Step","Action","Level","Last_AA","Sequence"]
+    fields=["Step","Action","Level","Last_AA","Prune_Reaosn","Sequence"]
 
     with open(filename,mode="w",newline="",encoding="utf-8") as f:
         #HEADER:
-        header=header = f"{'STEP':<8} | {'ACTION':<10} | {'LVL':<6} | {'LAST_AA':<10} | {'SEQUENCE'}\n"
+        header=header = f"{'STEP':<8} | {'ACTION':<10} | {'LVL':<6} | {'LAST_AA':<10} | {'PRUNE_REASON':<20} | {'SEQUENCE'}\n"
         f.write(header)
-        f.write("-" * 100 + "\n")
+        f.write("-" * 120 + "\n")
 
         writer = csv.DictWriter(f,fieldnames=fields)
 
@@ -624,12 +624,15 @@ def save_DFS_history_to_csv(history,filename="dfs_results.cvs"):
 
         for frame in history: 
             seq_string="-".join([str(aa) for aa in frame['sequence']])
+
+            reason = frame.get('prune_reason', "-") # if add - reason = "-"
             
             line=(
                 f"{frame['step']:<8} | "
                     f"{frame['action']:<10} | "
                     f"{frame['level']:<6} | "
                     f"{str(frame['last_AA_added']):<10} | "
+                    f"{reason:<35} | "
                     f"{seq_string}\n"
                 )
             f.write(line)
@@ -665,15 +668,15 @@ if __name__ == "__main__":
     }
 
     sample_targets_local = {
-        "hydro_min": -15.0,
-        "hydro_max": 5.0,
-        "mass_min": 6200,
-        "mass_max": 6800,
-        "stability_min": 75.0,
-        "binding_min": 120.0
+        "hydro_min": 5.0,
+        "hydro_max": 25.0,
+        "mass_min": 2700,
+        "mass_max": 3100,
+        "stability_min": 80.0,
+        "binding_min": 140.0
     }
 
-    target_length_local = 60
+    target_length_local = 26
     biological_switch_local = True
 
     weights_local = user_target_weights(sample_targets_local, target_length_local)

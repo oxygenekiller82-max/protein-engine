@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de séquences - Authentification</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <header>
+                <div class="logo">GÉNÉRATEUR<br><span>DE SÉQUENCES PEPTIDIQUES</span></div>
+                <nav>
+                    <ul>
+                        <li>ACCUEIL</li>
+                        <li>GÉNÉRATEUR</li>
+                        <li>COMPARATEUR</li>
+                        <li>CONTACT</li>
+                    </ul>
+                </nav>
+            </header>
+
+            <div class="hero">
+                <h1>Moteur Intelligent de Géneration de Séquences Peptidiques </h1>
+                <div class="hero-line"></div>
+            </div>
+
+            <div class="auth-cards">
+                <!-- CONNEXION -->
+                <div class="card login-card">
+                    <div class="card-header">
+                        <h2>CONNEXION</h2>
+                    </div>
+                    <form id="loginForm">
+                        <input type="email" id="loginEmail" placeholder="EMAIL" required>
+                        <input type="password" id="loginPassword" placeholder="MOT DE PASSE" required>
+                        <button type="submit" class="btn-mauve">SE CONNECTER</button>
+                    </form>
+                </div>
+
+                <!-- INSCRIPTION -->
+                <div class="card signup-card">
+                    <div class="card-header">
+                        <h2>INSCRIPTION</h2>
+                    </div>
+                    <form id="signupForm">
+                        <input type="text" id="signupName" placeholder="NOM COMPLET" required>
+                        <input type="email" id="signupEmail" placeholder="EMAIL" required>
+                        <input type="password" id="signupPassword" placeholder="MOT DE PASSE" required>
+                        <button type="submit" class="btn-mauve">CRÉER MON COMPTE</button>
+                    </form>
+                </div>
+            </div>
+
+            <footer>
+                <p>www.generateur-sequences.fr</p>
+                <p>© 2026 - Tous droits réservés</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            if(email && password) {
+                localStorage.setItem('user', email);
+                localStorage.setItem('token', 'token-123');
+                window.location.href = '/dashboard';
+            } else {
+                alert('Veuillez remplir tous les champs');
+            }
+        });
+
+        document.getElementById('signupForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            if(name && email && password) {
+                localStorage.setItem('user', email);
+                localStorage.setItem('token', 'token-123');
+                window.location.href = '/dashboard';
+            } else {
+                alert('Veuillez remplir tous les champs');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Sign Up</title>
+<link rel="stylesheet" href="signup.css">
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">Protein Engine</div>
+
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Logs</a></li>
+        <li><a href="#">Compare</a></li>
+        <li><a routerLink="/signup" class="active">Sign Up</a></li>
+    </ul>
+
+    <div class="nav-icons">
+        <span class="search"></span>
+        <span class="menu"></span>
+    </div>
+</nav>
+
+<div class="outer-frame">
+<div class="inner-frame">
+
+<!-- FORM -->
+<div class="form-container">
+    <h2>Sign Up</h2>
+    <form (ngSubmit)="register()">
+
+  <input type="text" placeholder="First Name" [(ngModel)]="user.firstName" name="firstName">
+
+  <input type="text" placeholder="Last Name" [(ngModel)]="user.lastName" name="lastName">
+
+  <input type="email" placeholder="Email" [(ngModel)]="user.email" name="email">
+
+  <input type="password" minlength="6" placeholder="Password" [(ngModel)]="user.password" name="password">
+
+  <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" name="confirmPassword">
+
+  <button type="submit">Register</button>
+
+</form>
+   
+    <p *ngIf="message" style="color: green;">
+     {{ message }}
+    </p>
+    <p class="signup-text">
+        Already have an account?
+        <a routerLink="/login">Login</a>
+    </p>
+</div>
+
+<!-- IMAGE -->
+<div class="image-container">
+    <img src="1000016544.jpg" alt="image">
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

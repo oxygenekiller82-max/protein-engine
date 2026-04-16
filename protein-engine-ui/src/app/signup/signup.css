@@ -1,0 +1,213 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* BODY + CADRE BLEU */
+body {
+    background-color: #f3f0df;
+    border: 25px solid #a5dbce;
+    min-height: 100vh;
+}
+
+/* NAVBAR */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+}
+
+/* LOGO */
+.logo {
+    font-weight: bold;
+    color: black;
+}
+
+/* MENU */
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+
+/* ICONES NAV */
+.nav-icons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* LOUPE */
+.search {
+    width: 15px;
+    height: 15px;
+    border: 2px solid black;
+    border-radius: 50%;
+    position: relative;
+}
+
+.search::after {
+    content: "";
+    width: 8px;
+    height: 2px;
+    background: black;
+    position: absolute;
+    right: -6px;
+    bottom: -2px;
+    transform: rotate(45deg);
+}
+
+/* MENU ICON */
+.menu {
+    width: 18px;
+    height: 12px;
+    position: relative;
+}
+
+.menu::before,
+.menu::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    background: black;
+    left: 0;
+}
+
+.menu::before {
+    top: 0;
+}
+
+.menu::after {
+    bottom: 0;
+}
+
+/* CADRE NOIR CENTRE */
+.inner-frame {
+    border: 8px solid black;
+    width: 80%;
+    margin: 60px auto;
+    padding: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+}
+
+/* FORM */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 50%;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid black;
+    background-color: transparent;
+}
+
+button {
+    padding: 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* TEXT INSCRIPTION */
+.signup-text {
+    font-size: 14px;
+}
+
+.signup-text a {
+    color: black;
+    font-weight: bold;
+}
+
+/* IMAGE */
+.image-container {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container img {
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    border: 2px solid black;
+}
+@media (max-width: 768px) {
+
+    /* NAVBAR */
+    nav {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-icons {
+        justify-content: center;
+    }
+
+    /* CADRE NOIR */
+    .inner-frame {
+        flex-direction: column;
+        width: 90%;
+        padding: 30px;
+        text-align: center;
+    }
+
+    /* FORM */
+    .form-container {
+        width: 100%;
+    }
+
+    /* IMAGE */
+    .image-container {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .image-container img {
+        width: 180px;
+        height: 180px;
+    }
+}
+nav ul li a {
+    text-decoration: none;
+    color: black;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+/* ligne sous page active */
+nav ul li a.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background-color:black;
+}

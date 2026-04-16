@@ -1,0 +1,4 @@
+# Depedencies
+node_modules/
+dist/
+.angular/

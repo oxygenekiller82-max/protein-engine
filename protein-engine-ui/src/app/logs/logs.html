@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="logs.css">
+<div class="page-wrapper">
+
+  <nav>
+    <div class="logo">Protein Engine</div>
+    <ul>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/logs" class="active">Logs</a></li>
+      <li><a href="/compare">Compare</a></li>
+      <li><a href="/signup">Sign Up</a></li>
+    </ul>
+    <div class="nav-icons">
+      <span class="search"></span>
+      <span class="menu"></span>
+    </div>
+  </nav>
+
+  <div class="inner-frame">
+    <h2 class="page-title">Activity Logs</h2>
+
+    <table class="logs-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Sequence</th>
+          <th>Action</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td>{{ log.id }}</td>
+          <td>{{ log.date }}</td>
+          <td>{{ log.sequence }}</td>
+          <td>{{ log.action }}</td>
+          <td [class]="log.status === 'Success' ? 'status-success' : 'status-failed'">
+            {{ log.status }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

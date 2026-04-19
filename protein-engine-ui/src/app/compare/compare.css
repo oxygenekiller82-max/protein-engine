@@ -21,6 +21,7 @@ nav {
 .logo {
   font-weight: bold;
   color: black;
+  font-family: Arial, sans-serif;
 }
 
 nav ul {
@@ -35,6 +36,7 @@ nav ul li a {
   color: black;
   position: relative;
   padding-bottom: 5px;
+  font-family: Arial, sans-serif;
 }
 
 nav ul li a.active::after {
@@ -89,49 +91,106 @@ nav ul li a.active::after {
 }
 
 .menu::before { top: 0; }
-.menu::after  { bottom: 0; }
+.menu::after { bottom: 0; }
 
 .inner-frame {
   border: 8px solid black;
   width: 80%;
-  margin: 60px auto;
-  padding: 60px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 40px;
-}
-
-.form-container {
+  margin: 40px auto;
+  padding: 40px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 50%;
+  gap: 20px;
 }
 
-.form-container h2 {
-  font-size: 22px;
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zone-label {
+  font-size: 13px;
   font-weight: bold;
   font-family: Arial, sans-serif;
+  color: black;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.form input {
-  padding: 10px;
+.zone input,
+.zone textarea {
+  width: 100%;
+  padding: 12px;
   border: 1px solid black;
   background-color: transparent;
   font-size: 14px;
   font-family: Arial, sans-serif;
-  width: 100%;
+  resize: none;
 }
 
-.form button {
-  padding: 10px;
+.zone input[readonly] {
+  color: #333;
+  cursor: default;
+}
+
+.stored-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stored-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid black;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.stored-item button {
+  padding: 6px 16px;
+  background-color: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+
+.stored-item button:disabled {
+  background-color: #888;
+  cursor: not-allowed;
+}
+
+.tag-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid black;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: black;
+  padding: 0;
+}
+
+.compare-btn-wrapper button {
+  padding: 10px 30px;
   background-color: black;
   color: white;
   border: none;
@@ -140,69 +199,24 @@ nav ul li a.active::after {
   font-family: Arial, sans-serif;
 }
 
-.form button:hover {
+.compare-btn-wrapper button:hover {
   background-color: #333;
 }
 
-.signup-text {
-  font-size: 14px;
-  font-family: Arial, sans-serif;
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
 }
 
-.signup-text a {
-  color: black;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.image-container {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.image-container img {
-  width: 220px;
-  height: 220px;
-  object-fit: cover;
-  border: 2px solid black;
+.chart-box {
+  border: 1px solid black;
+  padding: 20px;
 }
 
 @media (max-width: 768px) {
-  nav {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-
-  nav ul {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .nav-icons {
-    justify-content: center;
-  }
-
-  .inner-frame {
-    flex-direction: column;
-    width: 90%;
-    padding: 30px;
-    text-align: center;
-  }
-
-  .form-container {
-    width: 100%;
-  }
-
-  .image-container {
-    width: 100%;
-    margin-top: 20px;
-  }
-
-  .image-container img {
-    width: 180px;
-    height: 180px;
-  }
+  nav { flex-direction: column; gap: 15px; text-align: center; }
+  nav ul { flex-direction: column; gap: 10px; }
+  .inner-frame { width: 90%; padding: 25px; }
+  .chart-grid { grid-template-columns: 1fr; }
 }

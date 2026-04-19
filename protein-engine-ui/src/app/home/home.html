@@ -1,0 +1,82 @@
+<link rel="stylesheet" href="home.css">
+<div class="page-wrapper">
+
+  <nav>
+    <div class="logo">Protein Engine</div>
+    <ul>
+      <li><a href="/home" class="active">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/logs">Logs</a></li>
+      <li><a href="/signup">Sign Up</a></li>
+      <li><a href="/compare">Compare</a></li>
+    </ul>
+    <div class="nav-icons">
+      <span class="search"></span>
+      <span class="menu"></span>
+    </div>
+  </nav>
+
+  <div class="inner-frame">
+
+    <!-- COLONNE GAUCHE : filtres -->
+    <div class="form-container">
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Hydrophobicity min</label>
+          <input type="number" [(ngModel)]="hydrophobicityMin" placeholder="min">
+        </div>
+        <div class="filter-group">
+          <label>Hydrophobicity max</label>
+          <input type="number" [(ngModel)]="hydrophobicityMax" placeholder="max">
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Mass min</label>
+          <input type="number" [(ngModel)]="massMin" placeholder="min">
+        </div>
+        <div class="filter-group">
+          <label>Mass max</label>
+          <input type="number" [(ngModel)]="massMax" placeholder="max">
+        </div>
+      </div>
+
+      <div class="filter-group full">
+        <label>Stability min</label>
+        <input type="number" [(ngModel)]="stabilityMin" placeholder="min">
+      </div>
+
+      <div class="filter-group full">
+        <label>Binding min</label>
+        <input type="number" [(ngModel)]="bindingMin" placeholder="min">
+      </div>
+
+      <button class="btn-analyser" (click)="analyser()">Analyser</button>
+
+    </div>
+
+    <!-- COLONNE DROITE : generate + animation -->
+    <div class="animation-container">
+      <button class="btn-generate" (click)="generate()">Generate</button>
+      <div class="animation-zone">
+        <span *ngIf="!generated">Zone d'animation</span>
+        <span *ngIf="generated">{{ animationText }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BAS : sauvegarder + compare -->
+  <div class="bottom-bar">
+    <input
+      type="text"
+      [(ngModel)]="sequenceName"
+      placeholder="Zone pour sauvegarder le nom de la séquence..."
+      class="sequence-input"
+    >
+    <button class="btn-compare" (click)="compare()">Compare</button>
+  </div>
+
+</div>

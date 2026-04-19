@@ -11,6 +11,7 @@
   min-height: 100vh;
 }
 
+/* NAVBAR */
 nav {
   display: flex;
   justify-content: space-between;
@@ -35,6 +36,7 @@ nav ul li a {
   color: black;
   position: relative;
   padding-bottom: 5px;
+  font-family: Arial, sans-serif;
 }
 
 nav ul li a.active::after {
@@ -91,38 +93,51 @@ nav ul li a.active::after {
 .menu::before { top: 0; }
 .menu::after  { bottom: 0; }
 
+/* CADRE PRINCIPAL */
 .inner-frame {
   border: 8px solid black;
   width: 80%;
-  margin: 60px auto;
-  padding: 60px;
+  margin: 40px auto 20px auto;
+  padding: 40px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 40px;
 }
 
+/* COLONNE GAUCHE */
 .form-container {
+  width: 50%;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  width: 50%;
 }
 
-.form-container h2 {
-  font-size: 22px;
+.filter-row {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.filter-group.full {
+  width: 100%;
+}
+
+.filter-group label {
+  font-size: 12px;
   font-weight: bold;
+  color: black;
   font-family: Arial, sans-serif;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.form input {
-  padding: 10px;
+.filter-group input {
+  padding: 8px 10px;
   border: 1px solid black;
   background-color: transparent;
   font-size: 14px;
@@ -130,8 +145,33 @@ nav ul li a.active::after {
   width: 100%;
 }
 
-.form button {
-  padding: 10px;
+.btn-analyser {
+  padding: 10px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  align-self: flex-start;
+  margin-top: 5px;
+}
+
+.btn-analyser:hover {
+  background-color: #333;
+}
+
+/* COLONNE DROITE */
+.animation-container {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.btn-generate {
+  padding: 8px 20px;
   background-color: black;
   color: white;
   border: none;
@@ -140,35 +180,61 @@ nav ul li a.active::after {
   font-family: Arial, sans-serif;
 }
 
-.form button:hover {
+.btn-generate:hover {
   background-color: #333;
 }
 
-.signup-text {
+.animation-zone {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: #666;
+  font-style: italic;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+/* BARRE DU BAS */
+.bottom-bar {
+  width: 80%;
+  margin: 0 auto 40px auto;
+  border: 8px solid black;
+  padding: 25px 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sequence-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid black;
+  background-color: transparent;
   font-size: 14px;
   font-family: Arial, sans-serif;
 }
 
-.signup-text a {
-  color: black;
-  font-weight: bold;
-  text-decoration: none;
+.btn-compare {
+  padding: 10px 25px;
+  background-color: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
 }
 
-.image-container {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.btn-compare:hover {
+  background-color: #333;
 }
 
-.image-container img {
-  width: 220px;
-  height: 220px;
-  object-fit: cover;
-  border: 2px solid black;
-}
-
+/* RESPONSIVE */
 @media (max-width: 768px) {
   nav {
     flex-direction: column;
@@ -181,28 +247,24 @@ nav ul li a.active::after {
     gap: 10px;
   }
 
-  .nav-icons {
-    justify-content: center;
-  }
-
   .inner-frame {
     flex-direction: column;
     width: 90%;
-    padding: 30px;
-    text-align: center;
+    padding: 25px;
   }
 
-  .form-container {
+  .form-container,
+  .animation-container {
     width: 100%;
   }
 
-  .image-container {
-    width: 100%;
-    margin-top: 20px;
+  .filter-row {
+    flex-direction: column;
   }
 
-  .image-container img {
-    width: 180px;
-    height: 180px;
+  .bottom-bar {
+    width: 90%;
+    flex-direction: column;
+    padding: 20px;
   }
 }

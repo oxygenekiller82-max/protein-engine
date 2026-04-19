@@ -1,60 +1,48 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Protein Engine</title>
-    <link rel="stylesheet" href="login.css">
-</head>
-<body>
+<link rel="stylesheet" href="login.css">
+<div class="page-wrapper">
 
-    <!-- NAVBAR -->
-    <nav>
-        <div class="logo">Protein Engine</div>
-        <ul>
-            <li><a href="#" >Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Logs</a></li>
-            <li><a href="#">Compare</a></li>
-            <li><a href="#" class="active">Sign Up</a></li>
-        </ul>
-        <div class="nav-icons">
-            <span class="search"></span>
-            <span class="menu"></span>
-        </div>
-    </nav>
-  
+  <nav>
+    <div class="logo">Protein Engine</div>
+    <ul>
+      <li><a routerLink="/home">Home</a></li>
+      <li><a routerLink="/about">About</a></li>
+      <li><a routerLink="/logs">Logs</a></li>
+      <li><a routerLink="/compare">Compare</a></li>
+      <li><a routerLink="/login" class="active">Sign Up</a></li>
+    </ul>
+    <div class="nav-icons">
+      <span class="search"></span>
+      <span class="menu"></span>
+    </div>
+  </nav>
 
-    <!-- CADRE EXTERIEUR -->
-    <div class="outer-frame">
+  <div class="inner-frame">
 
-        <!-- CADRE NOIR CENTRE -->
-        <div class="inner-frame">
-
-            <!-- FORMULAIRE -->
-            <div class="form-container">
-                <h2>Login</h2>
-
-                <form>
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Password" required>
-
-                    <button type="submit">Register</button>
-                    
-                </form>
-
-                <p class="signup-text">
-                    You don't have an account?
-                    <a routerLink="/signup">sign up</a>
-                </p>
-            </div>
-
-            <!-- IMAGE -->
-            <div class="image-container">
-                <img src="assets/1000016544.jpg" alt="image">
-            </div>
-
-        </div>
-
+    <div class="form-container">
+      <h2>Login</h2>
+      <div class="form">
+        <input
+          type="email"
+          placeholder="Email"
+          [(ngModel)]="email"
+        >
+        <input
+          type="password"
+          placeholder="Password"
+          [(ngModel)]="password"
+        >
+        <button (click)="onLogin()">Login</button>
+      </div>
+      <p class="signup-text">
+        You don't have an account?
+        <a routerLink="/signup">Sign up</a>
+      </p>
     </div>
 
-</body>
+    <div class="image-container">
+      <img src="1000016544.jpg" alt="image">
+    </div>
+
+  </div>
+
+</div>

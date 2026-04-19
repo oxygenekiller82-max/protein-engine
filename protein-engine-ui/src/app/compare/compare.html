@@ -1,0 +1,80 @@
+<link rel="stylesheet" href="compare.css">
+<div class="page-wrapper">
+
+  <nav>
+    <div class="logo">Protein Engine</div>
+    <ul>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/logs">Logs</a></li>
+      <li><a href="/compare" class="active">Compare</a></li>
+      <li><a href="/signup">Sign Up</a></li>
+    </ul>
+    <div class="nav-icons">
+      <span class="search"></span>
+      <span class="menu"></span>
+    </div>
+  </nav>
+
+  <div class="inner-frame">
+
+    <!-- ZONE 1 : séquences sélectionnées -->
+    <div class="zone">
+      <label class="zone-label">select a sequence</label>
+      <input
+        type="text"
+        [(ngModel)]="sequenceName"
+        placeholder="Les séquences ajoutées apparaîtront ici..."
+        readonly
+      >
+    </div>
+
+    <!-- ZONE 2 : saisie texte libre -->
+    <div class="zone">
+      <label class="zone-label">Zone de saisie de texte</label>
+      <textarea
+        placeholder="Entrez du texte ici..."
+        rows="3"
+      ></textarea>
+    </div>
+
+    <!-- ZONE 3 : séquences stockées + bouton Add -->
+    <div class="zone">
+      <label class="zone-label">Selected sequence</label>
+      <div class="stored-list">
+        <div class="stored-item" *ngFor="let seq of storedSequences">
+          <span>{{ seq }}</span>
+          <button
+            (click)="addSequence(seq)"
+            [disabled]="selectedSequences.includes(seq) || selectedSequences.length >= 2"
+          >
+            {{ selectedSequences.includes(seq) ? '✓ Ajouté' : 'Add' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Tags séquences sélectionnées -->
+      <div class="tag-list" *ngIf="selectedSequences.length > 0">
+        <span class="tag" *ngFor="let s of selectedSequences">
+          {{ s }}
+          <button class="remove-tag" (click)="removeSequence(s)">✕</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- BOUTON COMPARE -->
+    <div class="compare-btn-wrapper">
+      <button (click)="compare()">Compare</button>
+    </div>
+
+    <!-- RESULTATS : 4 graphes -->
+    <div class="charts-section" *ngIf="chartsRendered">
+      <div class="chart-grid">
+        <div class="chart-box" *ngFor="let i of [0,1,2,3]">
+          <canvas [id]="'chart' + i"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

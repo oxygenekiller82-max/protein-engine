@@ -156,4 +156,4 @@ def compare_sequences(target_seq, res_sequence):
 
 
 #compare_sequences("KERSWFVNDYQLAMPTRICHGAKLDV",
-#                  "TDNEPMQKSLCIHYVFGARTTEDNLP")
+#              "TDNEPMQKSLCIHYVFGARTTEDNLP")

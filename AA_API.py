@@ -113,28 +113,38 @@ def get_comparsion_data():
     #JSON -> body data
     data=request.get_json()
 
+
     #3letter ARRAYS now
-    target_seq=data.get('target_seq')
-    generated_seq=data.get('generated_seq')
+    target_seq=data.get('target_seq','')
+    generated_seq=data.get('generated_seq','')
 
     #jusst checking...
     if not target_seq or not generated_seq:
         return jsonify({"error": "Missing sequences."}), 400
     
+
     try: 
         #target 3->1 letter 
-        target_seq_final = "".join([reverse_mapping[AA] for AA in target_seq])
+        #target_seq_final = "".join([reverse_mapping[AA] for AA in target_seq])
         #generated 3->1 letter 
-        generated_seq_final = "".join([reverse_mapping[AA] for AA in generated_seq])
+        #generated_seq_final = "".join([reverse_mapping[AA] for AA in generated_seq])
 
-        results = compare_sequences(target_seq, generated_seq)
+        target_list=target_seq.split()
+        target_seq_final = "".join([reverse_mapping[AA.title()] for AA in target_list])
+
+        generated_list = generated_seq.split()
+        generated_seq_final = "".join([reverse_mapping[AA.title()] for AA in generated_list])
+
+        results = compare_sequences(target_seq_final, generated_seq_final)
 
         return jsonify(results)
     
     except KeyError as e: 
+        print("DEBUG KeyError:", e) 
         return jsonify({"error": f"Invalid Amino Acid: {str(e)}"}), 400
     
     except Exception as e:
+        print("DEBUG Exception:", type(e).__name__, e) 
         return jsonify({"error": str(e)}), 500
 
 

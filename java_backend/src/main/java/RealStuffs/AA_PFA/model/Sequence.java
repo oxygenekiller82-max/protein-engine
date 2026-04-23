@@ -2,9 +2,12 @@ package RealStuffs.AA_PFA.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,7 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 
 @Entity
@@ -46,7 +48,7 @@ public class Sequence {
     //relation avec user : many sequences same user
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @ToString.Exclude
+    @JsonIgnore
     private User user;
 	
 	
@@ -57,7 +59,7 @@ public class Sequence {
 
 	
 	//relation avec Contraintes table
-	@OneToOne(mappedBy="sequence",cascade=CascadeType.ALL,orphanRemoval=true)
+	@OneToOne(mappedBy="sequence",cascade=CascadeType.ALL,orphanRemoval=true, fetch=FetchType.EAGER)
 	//why cascade all ? 
 	//-> sequenceRepository.save(seq)
 	//-> Sees in the seq object -> Contraintes object attached !! 

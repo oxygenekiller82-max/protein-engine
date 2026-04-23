@@ -1,5 +1,7 @@
 package RealStuffs.AA_PFA.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,6 +38,7 @@ public class ContraintesBiochimiques {
 	@OneToOne
 	@JoinColumn (name="fk_peptide",referencedColumnName="id")
 	//has fk -> it's managing it heh.. 
+	@JsonIgnore
 	private Sequence sequence;
 	
 }

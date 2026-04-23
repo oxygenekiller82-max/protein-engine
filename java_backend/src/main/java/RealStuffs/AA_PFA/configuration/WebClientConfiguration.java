@@ -34,18 +34,6 @@ public class WebClientConfiguration {
 	
 	//POSTMAN ACCESS DENIED FIX, secuity blocks URL so..
 
-	@Bean
-	public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http)  {
-		    return http
-		        .csrf(csrf -> csrf.disable()) 
-		        .authorizeExchange(exchanges -> exchanges
-		        	.pathMatchers("/h2-console/**").permitAll()
-		            .anyExchange().permitAll() //now good! 
-		        )
-		        //H2 FRAMES
-		        .headers(headerSpec -> headerSpec
-		                .frameOptions(frameOptionsSpec -> frameOptionsSpec.disable()))
-		    	.build();
-	}
+
 	
 }

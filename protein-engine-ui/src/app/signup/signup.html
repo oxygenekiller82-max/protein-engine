@@ -17,20 +17,22 @@
   </nav>
 
   <div class="inner-frame">
-
     <div class="form-container">
       <h2>Sign Up</h2>
-      <div class="form">
+      
+      <form class="form" (ngSubmit)="register()">
         <input type="text" placeholder="First Name" [(ngModel)]="user.firstName" name="firstName">
         <input type="text" placeholder="Last Name"  [(ngModel)]="user.lastName"  name="lastName">
         <input type="email" placeholder="Email"     [(ngModel)]="user.email"     name="email">
         <input type="password" placeholder="Password" minlength="6" [(ngModel)]="user.password" name="password">
         <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" name="confirmPassword">
-        <button (click)="register()">Register</button>
-      </div>
-
-      <p *ngIf="message" class="error-msg">{{ message }}</p>
-
+        
+        <button type="submit" [disabled]="!user.email || !user.password">Register</button>
+      </form>
+   
+      <p *ngIf="message" style="color: green;">
+       {{ message }}
+      </p>
       <p class="signup-text">
         Already have an account?
         <a routerLink="/login">Login</a>
@@ -40,7 +42,6 @@
     <div class="image-container">
       <img src="1000016544.jpg" alt="image">
     </div>
-
   </div>
 
 </div>

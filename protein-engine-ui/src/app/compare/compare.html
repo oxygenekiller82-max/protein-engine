@@ -19,44 +19,66 @@
   <div class="inner-frame">
 
     <!-- ZONE 1 : séquences sélectionnées -->
+     <!--drop down menu now..-->
     <div class="zone">
+
       <label class="zone-label">select a sequence</label>
-      <input
-        type="text"
-        [(ngModel)]="sequenceName"
-        placeholder="Les séquences ajoutées apparaîtront ici..."
-        readonly
-      >
+
+      <select [(ngModel)]="primarySequence" (change)="onPrimarySelect()" class="sequence-dropdown">
+
+        <option [ngValue]="null" disabled>Choose a saved sequence...</option>
+
+        <option *ngFor="let seq of userSavedSequences" [ngValue]="seq">
+          ID: {{ seq.id }} — Target: {{ seq.targetLength }} AA 
+          Preview: [{{ seq.peptideChain | slice:0:15 }}...]
+        </option>
+
+      </select>
     </div>
+
+
 
     <!-- ZONE 2 : saisie texte libre -->
     <div class="zone">
       <label class="zone-label">Zone de saisie de texte</label>
       <textarea
+      [(ngModel)]="manualSequence"
         placeholder="Entrez du texte ici..."
         rows="3"
       ></textarea>
     </div>
 
+    <!--ALL KINDS OF ERRORS YES-->
+    <p *ngIf="errorMessage" style="color:red">
+      {{ errorMessage }}
+    </p>
+
     <!-- ZONE 3 : séquences stockées + bouton Add -->
     <div class="zone">
       <label class="zone-label">Selected sequence</label>
       <div class="stored-list">
-        <div class="stored-item" *ngFor="let seq of storedSequences">
-          <span>{{ seq }}</span>
+
+        <div class="stored-item" *ngFor="let seq of selectedSequences">
+            <div class="seq-info">
+        <span class="id-tag">ID: {{ seq.id }}</span>
+        <span class="chain-text">{{ seq.peptideChain }}</span>
+         </div>
+
+        
           <button
             (click)="addSequence(seq)"
             [disabled]="selectedSequences.includes(seq) || selectedSequences.length >= 2"
           >
-            {{ selectedSequences.includes(seq) ? '✓ Ajouté' : 'Add' }}
+            {{ selectedSequences.includes(seq) ? ' Ajouté' : 'Add' }}
           </button>
+          
         </div>
       </div>
 
       <!-- Tags séquences sélectionnées -->
       <div class="tag-list" *ngIf="selectedSequences.length > 0">
         <span class="tag" *ngFor="let s of selectedSequences">
-          {{ s }}
+          ID: {{ s.id }}
           <button class="remove-tag" (click)="removeSequence(s)">✕</button>
         </span>
       </div>
@@ -67,11 +89,57 @@
       <button (click)="compare()">Compare</button>
     </div>
 
+    <!--AUC %s first-->
+    <div class="results-summary card" *ngIf="chartsRendered">
+
+      <h3 >Similarity Analysis (AUC)</h3>
+      <div class="score-grid">
+        <div class="score-item">
+          <span class="score-label">Hydropathy</span>
+          <p class="score-value" [style.color]="hydroSim > 80 ? '#4ade80' : '#facc15'">
+            {{ hydroSim }}%
+          </p>
+
+        </div>
+        <div class="score-item">
+          <span class="score-label">Stability</span>
+          <p class="score-value" [style.color]="stabilitySim > 80 ? '#4ade80' : '#facc15'">
+            {{ stabilitySim }}%
+          </p>
+        </div>
+
+        <div class="score-item">
+          <span class="score-label">Molecular Mass</span>
+          <p class="score-value" [style.color]="massSim > 80 ? '#4ade80' : '#facc15'">
+            {{ massSim }}%
+          </p>
+        </div>
+
+        <div class="score-item">
+          <span class="score-label">Binding Affinity</span>
+          <p class="score-value" [style.color]="bindingSim > 80 ? '#4ade80' : '#facc15'">
+            {{ bindingSim }}%
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
     <!-- RESULTATS : 4 graphes -->
     <div class="charts-section" *ngIf="chartsRendered">
       <div class="chart-grid">
-        <div class="chart-box" *ngFor="let i of [0,1,2,3]">
-          <canvas [id]="'chart' + i"></canvas>
+        <div class="chart-box">
+          <canvas id="hydroChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="stabilityChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="bindingChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="massChart"></canvas>
         </div>
       </div>
     </div>

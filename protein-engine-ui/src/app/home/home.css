@@ -168,6 +168,7 @@ nav ul li a.active::after {
   flex-direction: column;
   align-items: flex-end;
   gap: 15px;
+  min-height: 700px;
 }
 
 .btn-generate {
@@ -267,4 +268,45 @@ nav ul li a.active::after {
     flex-direction: column;
     padding: 20px;
   }
+}
+
+/*XAI STYLE*/
+.aa-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 4px;
+  background: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.aa-green {
+  background: #16a34a;
+  animation: fadeIn 0.2s ease;
+}
+
+.aa-red {
+  background: #dc2626;
+  animation: fadeIn 0.2s ease;
+}
+
+.action-add { color: #16a34a; }
+.action-prune { color: #dc2626; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-card{
+  padding: 10px;
+  margin: 10px;
+}
+
+.action-badge {
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: left;
+  gap: 8px;
 }

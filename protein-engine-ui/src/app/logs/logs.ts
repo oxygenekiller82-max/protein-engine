@@ -1,18 +1,78 @@
-import { Component } from '@angular/core';
+import { Component,OnInit,inject,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { SelectionService } from '../services/selection.service';
+//oh that's how u import it yh yh 
+interface SequenceDTO {
+  id: number;
+  peptideChain: string;
+  targetLength: number;
+  isBiological: boolean;
+  createdAt: string;
+  masseCible: number;
+  echelleKyteDoolittle: number;
+  indiceAliphatique: number;
+  bindingAffinity: number;
+}
 
 @Component({
   selector: 'app-logs',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './logs.html',
+  standalone: true,                           
+  imports: [CommonModule],
   styleUrls: ['./logs.css']
+
+  
 })
-export class LogsComponent {
-  logs = [
-    { id: 1, date: '2026-04-18', sequence: 'Sequence_Alpha', action: 'Generated', status: 'Success' },
-    { id: 2, date: '2026-04-17', sequence: 'Sequence_Beta', action: 'Compared', status: 'Success' },
-    { id: 3, date: '2026-04-16', sequence: 'Sequence_Gamma', action: 'Generated', status: 'Failed' },
-    { id: 4, date: '2026-04-15', sequence: 'Sequence_Delta', action: 'Compared', status: 'Success' },
-  ];
+
+
+ export class LogsComponent implements OnInit  {
+
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private selectionService = inject(SelectionService);
+
+  allSequences: any[] = [];
+  selectedItems: any[] = [];
+  private cdr = inject(ChangeDetectorRef);
+
+ ngOnInit(){
+  //my-sequenvces get
+  this.http.get<SequenceDTO[]>('http://localhost:8081/api/PFA/my-sequences').subscribe({
+    next: (data)=>{
+      //all for the table 
+      this.allSequences=data.map(s=>({ //MAP IS GENIUS HERE
+        id: s.id,
+        peptideChain: s.peptideChain,
+        length: s.targetLength,
+        isBiological: s.isBiological,
+        creationTime: s.createdAt || new Date().toLocaleString(),
+        status: s.peptideChain.includes('API') ? 'Failed' : 'Success',
+        mass: s.masseCible,       
+        hydro: s.echelleKyteDoolittle,
+        stability: s.indiceAliphatique,
+        binding: s.bindingAffinity
+      }));
+      this.cdr.detectChanges() //WAKE THE F UP ANGUALR
+    }
+  });
+  
+}
+
+toggleSelection(seq:any){
+  //????
+  if (this.selectedItems.find(i => i.id === seq.id)) {
+    this.selectedItems = this.selectedItems.filter(i => i.id !== seq.id);
+  } else if (this.selectedItems.length < 2) {
+    this.selectedItems.push(seq);
+  }
+
+  if (this.selectedItems.length === 2) {
+    this.selectionService.setSelection(this.selectedItems);
+    this.router.navigate(['/compare']);
+  }
+
+}
+  
 }

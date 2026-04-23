@@ -19,28 +19,58 @@
   <div class="inner-frame">
     <h2 class="page-title">Activity Logs</h2>
 
-    <table class="logs-table">
+    <table class="logs-table table-responsive">
       <thead>
         <tr>
-          <th>#</th>
-          <th>Date</th>
-          <th>Sequence</th>
-          <th>Action</th>
+          <th>ID</th>
           <th>Status</th>
+          <th>Length</th>
+          <th>Type</th>
+          <th>Created At</th>
+          <th>Sequence</th>
+          <th>Mass</th>
+          <th>Hydro</th>
+          <th>Stability</th>
+          <th>Binding</th>
+          <th>Select</th>
         </tr>
+
       </thead>
       <tbody>
-        <tr *ngFor="let log of logs">
+
+        <tr *ngFor="let log of allSequences"
+        (click)="toggleSelection(log)"
+        [class.row-selected]="selectedItems.includes(log)"
+        >
+
           <td>{{ log.id }}</td>
-          <td>{{ log.date }}</td>
-          <td>{{ log.sequence }}</td>
-          <td>{{ log.action }}</td>
-          <td [class]="log.status === 'Success' ? 'status-success' : 'status-failed'">
-            {{ log.status }}
+
+          <td>
+            <span [class]="log.status === 'Success' ? 'badge-success' : 'badge-failed'">
+              {{ log.status }}
+            </span>
           </td>
+
+          <td>
+            <span class="type-tag">{{ log.isBiological ? 'Biological' : 'Synthetic' }}</span>
+          </td>
+          <td>{{ log.length }}</td> 
+
+          <td class="time-col">{{ log.creationTime }}</td>
+          <td class="chain-col"><code>{{ log.peptideChain }}</code></td>
+
+          <td>{{ log.mass | number:'1.1-2' }}</td>
+          <td>{{ log.hydro }}</td>
+          <td>{{ log.stability }}</td>
+          <td>{{ log.binding }}</td>
+
+
+          <td><input type="checkbox" [checked]="selectedItems.includes(log)"></td>
+
         </tr>
       </tbody>
     </table>
+    <p>Total: {{ allSequences.length }}</p>
   </div>
 
 </div>

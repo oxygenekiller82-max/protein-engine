@@ -24,11 +24,12 @@
       <div class="filter-row">
         <div class="filter-group">
           <label>Hydrophobicity min</label>
-          <input type="number" [(ngModel)]="hydrophobicityMin" placeholder="min">
+          
+          <input type="number" [(ngModel)]="hydrophobicityMin" placeholder="min" required >
         </div>
         <div class="filter-group">
           <label>Hydrophobicity max</label>
-          <input type="number" [(ngModel)]="hydrophobicityMax" placeholder="max">
+          <input type="number" [(ngModel)]="hydrophobicityMax" placeholder="max" required>
         </div>
       </div>
 
@@ -43,17 +44,79 @@
         </div>
       </div>
 
-      <div class="filter-group full">
-        <label>Stability min</label>
-        <input type="number" [(ngModel)]="stabilityMin" placeholder="min">
+      <!--MUST ADD Sequence Lnegth + biologically sound button !!-->
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Stability min</label>
+          <input type="number" [(ngModel)]="stabilityMin" placeholder="min">
+        </div>
+  
+        <div class="filter-group">
+          <label>Binding min</label>
+          <input type="number" [(ngModel)]="bindingMin" placeholder="min">
+        </div>
+
       </div>
 
-      <div class="filter-group full">
-        <label>Binding min</label>
-        <input type="number" [(ngModel)]="bindingMin" placeholder="min">
+      <!--now the length + biological button-->
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Sequence desired length</label>
+          <input type="number" [(ngModel)]="length" placeholder=""> <!--added these ngModel !! for input !-->
+        </div>
+  
+        <!-- a bit of bugs with these...-->
+        <div class="filter-group">
+          <label>Biologically Sound ? </label>
+          <button
+            type="button"
+            class="btn-analyser"
+            style="height:29px; display: inline-flex; align-items: center;"
+            [class.active]="biologicalSwitch"
+            (click)="biologicalSwitch=! biologicalSwitch">
+            {{ biologicalSwitch ? 'YES' : 'NO' }}
+            <!--okay that's actually really neat, using ? yes: no for the text inside lol-->
+          </button>
+         
+        </div>
+
       </div>
 
+
+      <!--STATS-->
+      <div class="stats-panel" *ngIf="peptideStats">
+        <h2>Statistics about the generated sequence</h2>
+        <div class="stat-card">
+            <span class="stat-label">Hydrophobicity: </span>
+            <span class="stat-value">{{ peptideStats.hydro | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Mass: </span>
+            <span class="stat-value">{{ peptideStats.mass | number:'1.1-1' }} Da</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Stability: </span>
+            <span class="stat-value">{{ peptideStats.stability }}</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Binding Affinity: </span>
+            <span class="stat-value">{{ peptideStats.binding }}</span>
+        </div>
+    </div>
+
+    <!--STATS-->
+
+      
+
+      <!--again auto returns no ?-->
+      <!--
       <button class="btn-analyser" (click)="analyser()">Analyser</button>
+      -->
 
     </div>
 
@@ -63,20 +126,83 @@
       <div class="animation-zone">
         <span *ngIf="!generated">Zone d'animation</span>
         <span *ngIf="generated">{{ animationText }}</span>
+        
+        <!--TEMPORARY REMOVE IT-->
+        <p class="sequence-chain">
+          {{ finalSequence.join(' - ') }}
+        </p>
+
       </div>
+
+      <!--XAI-->
+      <div class="animation-zone">
+        
+        <!-- sequence display -->
+        <div class="sequence-display">
+          <span 
+            *ngFor="let aa of displayedSequence; let last = last"
+            class="aa-badge"
+            [class.aa-green]="last && lastAction === 'ADD'"
+            [class.aa-red]="last && lastAction === 'PRUNE'">
+            {{ aa }}
+          </span>
+        </div>
+      
+        <hr>
+        
+        
+      </div>
+      <div *ngIf="lastAction" 
+             class="action-badge"
+             [class.action-add]="lastAction === 'ADD'"
+             [class.action-prune]="lastAction === 'PRUNE'">
+             <div class="spinner-border spinner-border-sm text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="text-success">reasoning: </span>
+          {{ lastAction === 'ADD' ? '+ ' + displayedSequence[displayedSequence.length-1] : 'PRUNE: ' + lastPruneReason }}
+      </div>
+
+      <!--XAI-->
+
+       <!--Error messages from flask, mostly bad configuration-->
+      <div *ngIf="errorMessage" class="error-box">
+        <p *ngIf="errorMessage" class="error-detail" style="color:#c00a32; font-weight: bold;">
+          {{ errorMessage }}
+        </p>
     </div>
+      
+    </div>
+
+    
+
+   
+
 
   </div>
 
   <!-- BAS : sauvegarder + compare -->
+   <!--Backend Auto saves anyways...-->
+   <!--so just a quick compare again ? or just redirect bruh...-->
+
+
   <div class="bottom-bar">
-    <input
+    <!--<input
       type="text"
       [(ngModel)]="sequenceName"
       placeholder="Zone pour sauvegarder le nom de la séquence..."
       class="sequence-input"
-    >
+    > -->
+    <p>
+      Found a candidate sequence ? Compare it to other sequences for more insights! or download a complete log file to see the stpe by step algorithm's reasoning
+    </p>
     <button class="btn-compare" (click)="compare()">Compare</button>
+
+    <button *ngIf="history.length > 0" 
+      class="btn-compare" 
+      (click)="downloadLog()">
+       Download Log
+    </button>
   </div>
 
 </div>
